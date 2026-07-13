@@ -1,0 +1,1202 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>📐 Cuerpos Geométricos v3</title>
+<style>
+:root{
+  --bg:#eef2ff; --panel:#ffffff; --panel-2:#f6f8ff; --soft:#f0f3ff;
+  --text:#182135; --text-2:#4a5578; --text-m:#8a93b2;
+  --accent:#2563eb; --accent-2:#7c3aed; --ok:#059669; --warn:#d97706; --bad:#dc2626;
+  --line:rgba(37,99,235,.15); --line-2:rgba(37,99,235,.28);
+  --eq-bg:#eaf1ff; --eq-line:#c7d8ff;
+  --sh:0 6px 24px rgba(37,99,235,.10); --sh-lg:0 18px 50px rgba(37,99,235,.18);
+  --grad:linear-gradient(135deg,#2563eb,#7c3aed);
+  --fig-stroke:#2563eb; --fig-fill:rgba(37,99,235,.10); --fig-fill2:rgba(124,58,237,.12);
+  --eqfont:"Cambria Math","Cambria","Times New Roman",serif;
+}
+[data-theme="dark"]{
+  --bg:#0c1020; --panel:#151b2e; --panel-2:#1b2236; --soft:#1a2136;
+  --text:#e8edfb; --text-2:#a9b3d0; --text-m:#6f7a9c;
+  --accent:#5b8cff; --accent-2:#a78bfa; --ok:#34d399; --warn:#fbbf24; --bad:#f87171;
+  --line:rgba(120,150,255,.16); --line-2:rgba(120,150,255,.30);
+  --eq-bg:#172142; --eq-line:#2c3d6b;
+  --sh:0 6px 24px rgba(0,0,0,.4); --sh-lg:0 18px 50px rgba(0,0,0,.55);
+  --grad:linear-gradient(135deg,#5b8cff,#a78bfa);
+  --fig-stroke:#7aa2ff; --fig-fill:rgba(91,140,255,.14); --fig-fill2:rgba(167,139,250,.16);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.55;transition:background .3s,color .3s}
+a{color:var(--accent)}
+/* ---------- app shell (sidebar + main) ---------- */
+.app{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:236px;flex-shrink:0;height:100vh;background:var(--panel);border-right:1px solid var(--line);box-shadow:var(--sh);display:flex;flex-direction:column;z-index:50}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:1.02rem;letter-spacing:.2px;padding:16px 16px 12px;border-bottom:1px solid var(--line)}
+.brand .logo{width:38px;height:38px;border-radius:11px;background:var(--grad);display:flex;align-items:center;justify-content:center;font-size:20px;box-shadow:var(--sh);flex-shrink:0}
+.brand small{display:block;font-size:.64rem;font-weight:600;color:var(--text-m);letter-spacing:.5px}
+.nav{display:flex;flex-direction:column;gap:3px;flex:1;overflow-y:auto;padding:12px 10px}
+.nav button{border:1px solid transparent;background:transparent;color:var(--text-2);font:inherit;font-weight:700;font-size:.86rem;padding:9px 12px;border-radius:10px;cursor:pointer;transition:.18s;display:flex;align-items:center;gap:9px;text-align:left;width:100%}
+.nav button:hover{background:var(--soft);color:var(--accent)}
+.nav button.active{background:var(--grad);color:#fff;box-shadow:0 4px 14px rgba(37,99,235,.35)}
+.nav .navlbl{font-size:.64rem;font-weight:800;color:var(--text-m);text-transform:uppercase;letter-spacing:.08em;padding:12px 12px 4px}
+.nav .sep{height:1px;background:var(--line-2);margin:8px 6px}
+.side-foot{padding:10px 12px;border-top:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.side-foot .lbl{font-size:.72rem;font-weight:700;color:var(--text-m)}
+.tbtn{width:42px;height:32px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:.2s}
+.tbtn:hover{box-shadow:var(--sh)}
+.main{flex:1;height:100vh;overflow-y:auto}
+/* ---------- layout ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:22px 22px 70px}
+.sec{display:none;animation:fade .35s ease}
+.sec.show{display:block}
+.sec.repo-sec.show{display:flex;flex-direction:column;height:100%}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.hero{background:var(--grad);color:#fff;border-radius:22px;padding:26px 28px;box-shadow:var(--sh-lg);position:relative;overflow:hidden;margin-bottom:22px}
+.hero h1{font-size:1.7rem;font-weight:800;margin-bottom:6px}
+.hero p{font-size:.98rem;opacity:.94;max-width:760px}
+.hero .deco{position:absolute;right:-30px;top:-30px;font-size:150px;opacity:.14;transform:rotate(-12deg)}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:18px;box-shadow:var(--sh);padding:20px 22px;margin-bottom:18px}
+.card h2{font-size:1.22rem;font-weight:800;display:flex;align-items:center;gap:9px;margin-bottom:4px}
+.card h3{font-size:1.03rem;font-weight:800;color:var(--accent);margin:16px 0 7px;display:flex;align-items:center;gap:7px}
+.card p{margin:7px 0;color:var(--text-2)}
+.card p strong,.card li strong{color:var(--text)}
+.tag{display:inline-block;font-size:.7rem;font-weight:800;padding:2px 10px;border-radius:20px;background:var(--soft);color:var(--accent);border:1px solid var(--line-2);letter-spacing:.4px}
+ul.clean{list-style:none;padding:0;margin:8px 0}
+ul.clean li{padding:7px 12px;margin:6px 0;background:var(--panel-2);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;color:var(--text-2)}
+ul.clean li b{color:var(--text)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+@media(max-width:760px){.grid2{grid-template-columns:1fr}.app{flex-direction:column;height:auto;overflow:visible}.sidebar{width:100%;height:auto;border-right:none;border-bottom:1px solid var(--line)}.nav{flex-direction:row;flex-wrap:wrap;overflow:visible}.nav .navlbl,.nav .sep{display:none}.main{height:auto;overflow:visible}.sec.repo-sec.show{height:auto}}
+/* fig menu cards (intro) */
+.figlink{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px;cursor:pointer;transition:.2s;text-align:center;box-shadow:var(--sh)}
+.figlink:hover{transform:translateY(-4px);box-shadow:var(--sh-lg);border-color:var(--line-2)}
+.figlink .em{font-size:40px;display:block;margin-bottom:6px}
+.figlink b{font-size:1rem;display:block;color:var(--text)}
+.figlink span{font-size:.76rem;color:var(--text-m)}
+/* anatomical diagram */
+.diagram-box{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:14px 12px 10px;margin:14px 0;text-align:center}
+.diagram-box svg{max-width:100%;height:auto;max-height:320px}
+.diagram-box .cap{font-size:.78rem;font-weight:700;color:var(--text-m);margin-top:8px}
+/* formulas */
+.formula{background:var(--eq-bg);border:1px solid var(--eq-line);border-radius:12px;padding:12px 16px;margin:9px 0;font-family:var(--eqfont);font-size:1.12rem;color:var(--text);display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center}
+.formula .lbl{font-family:'Segoe UI',sans-serif;font-size:.72rem;font-weight:800;color:var(--accent);background:var(--panel);border:1px solid var(--line-2);border-radius:8px;padding:2px 8px;letter-spacing:.4px}
+.eqwrap{font-family:var(--eqfont);font-size:1.06rem;background:var(--eq-bg);border:1px solid var(--eq-line);border-radius:9px;padding:6px 12px;margin:5px 0;overflow-x:auto}
+.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px}
+.frac .n{border-bottom:1.6px solid currentColor;padding:0 5px}
+.frac .d{padding:0 5px}
+sup,sub{font-size:.72em}
+/* worked examples */
+.ejemplo{border:1px solid var(--line-2);border-radius:14px;overflow:hidden;margin:14px 0;background:var(--panel-2)}
+.ejemplo .eh{background:var(--soft);padding:10px 15px;display:flex;align-items:center;justify-content:space-between;gap:10px;border-bottom:1px solid var(--line)}
+.ejemplo .eh b{font-size:.95rem;color:var(--accent)}
+.ejemplo .eh .ehbtns{display:flex;gap:8px}
+.ejemplo .eb{padding:14px 16px}
+.ejemplo .sol{display:none;margin-top:10px;border-top:1px dashed var(--line-2);padding-top:10px}
+.ejemplo.open .sol{display:block}
+.paso{margin:9px 0;padding-left:14px;border-left:2px dashed var(--line-2)}
+.paso .pt{font-weight:800;font-size:.82rem;color:var(--accent-2);display:block;margin-bottom:2px}
+.res{background:var(--eq-bg);border:1px solid var(--eq-line);border-radius:10px;padding:9px 13px;margin-top:8px;font-weight:700;font-family:var(--eqfont);font-size:1.04rem}
+.res .ok{color:var(--ok)}
+/* buttons */
+.btn{border:none;border-radius:10px;padding:7px 13px;font:inherit;font-weight:700;font-size:.8rem;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:.18s}
+.btn-pdf{background:rgba(220,38,38,.09);color:var(--bad);border:1px solid rgba(220,38,38,.24);box-shadow:none}
+.btn-pdf:hover{background:rgba(220,38,38,.16);border-color:rgba(220,38,38,.4);transform:translateY(-1px)}
+.btn-g{background:var(--soft);color:var(--accent);border:1px solid var(--line-2);box-shadow:none}
+.btn-g:hover{background:rgba(37,99,235,.12);border-color:var(--accent);transform:translateY(-1px)}
+.btn-o{background:var(--panel-2);border:1px solid var(--line-2);color:var(--text-2)}
+.btn-o:hover{color:var(--accent);border-color:var(--accent)}
+.btn-o.active{background:var(--grad);color:#fff;border-color:transparent}
+/* exercises */
+.exbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center;margin-bottom:14px}
+.exbar .grp{display:flex;gap:5px;flex-wrap:wrap;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px;box-shadow:var(--sh)}
+.excard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 17px;margin-bottom:12px;box-shadow:var(--sh)}
+.excard .xh{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+.excard .xn{display:flex;align-items:center;gap:8px;font-weight:800}
+.excard .xn .num{width:28px;height:28px;border-radius:9px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.82rem;flex-shrink:0}
+.pill{font-size:.66rem;font-weight:800;padding:2px 9px;border-radius:20px;letter-spacing:.3px}
+.pill.f{background:rgba(5,150,105,.14);color:var(--ok)}
+.pill.m{background:rgba(217,119,6,.15);color:var(--warn)}
+.pill.d{background:rgba(220,38,38,.14);color:var(--bad)}
+.excard .enun{color:var(--text-2);margin:4px 0 10px}
+.excard .sol{display:none;margin-top:10px;border-top:1px dashed var(--line-2);padding-top:10px}
+.excard.open .sol{display:block}
+.xactions{display:flex;gap:8px;flex-wrap:wrap}
+/* quiz repo */
+.qcard{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 17px;margin-bottom:12px;box-shadow:var(--sh)}
+.qcard .qq{font-weight:700;margin-bottom:9px;display:flex;gap:9px}
+.qcard .qq .num{width:26px;height:26px;border-radius:8px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;flex-shrink:0}
+.opts{list-style:none;padding:0;margin:0}
+.opts li{padding:8px 12px;margin:5px 0;border:1px solid var(--line);border-radius:10px;background:var(--panel-2);display:flex;gap:9px;align-items:center;font-size:.9rem}
+.opts li .lt{width:24px;height:24px;border-radius:7px;background:var(--soft);color:var(--text-2);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:.78rem;flex-shrink:0}
+.opts li.correct{border-color:var(--ok);background:rgba(5,150,105,.1)}
+.opts li.correct .lt{background:var(--ok);color:#fff}
+.exp{margin-top:8px;background:var(--eq-bg);border:1px solid var(--eq-line);border-radius:10px;padding:9px 13px;font-size:.86rem;color:var(--text-2)}
+.exp b{color:var(--ok)}
+/* repo internal scroll */
+.repo-list{flex:1;min-height:0;overflow-y:auto;padding:4px 4px 20px}
+.repo-list::-webkit-scrollbar{width:8px}
+.repo-list::-webkit-scrollbar-thumb{background:var(--accent);border-radius:10px}
+.main.lock{overflow:hidden}
+.main.lock .wrap{height:100%;display:flex;flex-direction:column;padding-bottom:22px}
+.main.lock .foot{display:none}
+/* calculator */
+.calc-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.calc-panel{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:16px 18px}
+.calc-panel h3{font-size:.9rem;font-weight:800;color:var(--accent);margin-bottom:6px;display:flex;align-items:center;gap:7px}
+.calc-split{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.calc-sub{min-width:0}
+.calc-sub h3{border-bottom:1px solid var(--line);padding-bottom:6px;margin-bottom:8px}
+.calc-pasos{margin-top:6px}
+.calc-pasos .paso:first-child{margin-top:2px}
+@media(max-width:900px){.calc-grid{grid-template-columns:1fr}}
+@media(max-width:560px){.calc-split{grid-template-columns:1fr}}
+.field{margin:10px 0}
+.field label{display:block;font-size:.78rem;font-weight:800;color:var(--text-2);margin-bottom:4px}
+.field input,.field select{width:100%;padding:9px 12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--panel-2);color:var(--text);font:inherit;font-size:.95rem;outline:none}
+.field input:focus,.field select:focus{border-color:var(--accent)}
+.figbox{background:var(--panel-2);border:1px solid var(--line);border-radius:16px;padding:14px;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:280px}
+.figbox svg{max-width:100%;height:auto}
+.resbox{background:var(--eq-bg);border:1px solid var(--eq-line);border-radius:14px;padding:14px 16px;margin-top:14px}
+.resrow{display:flex;justify-content:space-between;gap:10px;padding:6px 0;border-bottom:1px dashed var(--eq-line);font-family:var(--eqfont)}
+.resrow:last-child{border-bottom:none}
+.resrow .k{font-weight:700;color:var(--text-2);font-family:'Segoe UI',sans-serif;font-size:.85rem}
+.resrow .v{font-weight:800;color:var(--accent)}
+.foot{text-align:center;color:var(--text-m);font-size:.78rem;margin-top:30px}
+.foot b{color:var(--accent)}
+.note{font-size:.8rem;color:var(--text-m);font-style:italic}
+/* toolbar of theory buttons */
+.fig-tools{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0 2px}
+/* 3D viewer */
+.v3d-box{background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:12px;margin:10px 0;text-align:center}
+.v3d-box canvas{width:100%;max-width:340px;height:260px;touch-action:none;cursor:grab}
+.v3d-box canvas:active{cursor:grabbing}
+.v3d-cap{font-size:.76rem;color:var(--text-m);margin-top:4px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;align-items:start}
+@media(max-width:720px){.two-col{grid-template-columns:1fr}}
+/* share modal */
+.modal-ov{position:fixed;inset:0;background:rgba(10,15,30,.55);backdrop-filter:blur(2px);z-index:200;display:none;align-items:center;justify-content:center;padding:20px}
+.modal-ov.show{display:flex}
+.modal{background:var(--panel);border:1px solid var(--line-2);border-radius:18px;box-shadow:var(--sh-lg);max-width:420px;width:100%;padding:20px 22px}
+.modal h3{font-size:1.05rem;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.modal p{font-size:.84rem;color:var(--text-2);margin-bottom:12px}
+.modal .mrow{display:flex;flex-direction:column;gap:8px}
+.modal .mbtn{display:flex;align-items:center;gap:10px;padding:11px 14px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--text);font:inherit;font-weight:700;font-size:.9rem;cursor:pointer;transition:.18s;text-align:left}
+.modal .mbtn:hover{border-color:var(--accent);background:var(--soft)}
+.modal .mbtn .me{font-size:1.2rem}
+.modal .mclose{margin-top:14px;width:100%;justify-content:center;padding:9px;border-radius:10px;border:none;background:var(--grad);color:#fff;font:inherit;font-weight:800;cursor:pointer}
+/* contexto */
+.ctx-card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:15px 17px;margin-bottom:12px;box-shadow:var(--sh)}
+.ctx-card .ch{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.ctx-card .ctag{font-size:.66rem;font-weight:800;padding:2px 9px;border-radius:20px;background:var(--soft);color:var(--accent);border:1px solid var(--line-2)}
+.ctx-form{background:var(--panel-2);border:1px dashed var(--line-2);border-radius:14px;padding:16px 18px;margin-bottom:16px}
+.ctx-form .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:640px){.ctx-form .row{grid-template-columns:1fr}}
+.ctx-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.btn-del{background:transparent;border:1px solid var(--line-2);color:var(--text-m)}
+.btn-del:hover{color:var(--bad);border-color:var(--bad)}
+/* calc mode toggle */
+.calc-mode{display:flex;gap:6px;margin-bottom:10px}
+.calc-mode button{flex:1;justify-content:center}
+/* whatsapp button (subtle) */
+.btn-wa{background:rgba(37,211,102,.11);color:#1a9e51;border:1px solid rgba(37,211,102,.3);box-shadow:none}
+.btn-wa:hover{background:rgba(37,211,102,.2);border-color:rgba(37,211,102,.5);transform:translateY(-1px)}
+[data-theme="dark"] .btn-wa{color:#3ddc84}
+/* maximize button (subtle, overlaid) */
+.figwrap{position:relative}
+.v3d-box{position:relative}
+.fs-btn{position:absolute;top:8px;right:8px;width:32px;height:32px;border-radius:8px;border:1px solid var(--line-2);background:var(--panel);color:var(--text-2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:.9;transition:.18s;z-index:3;box-shadow:var(--sh-sm,0 2px 6px rgba(0,0,0,.12))}
+.fs-btn:hover{opacity:1;color:var(--accent);border-color:var(--accent);background:var(--soft)}
+.fs-btn svg{display:block}
+.fs-btn2{right:46px}
+.fs-btn.active{color:#fff;background:var(--grad);border-color:transparent;opacity:1}
+.diagram-box{position:relative}
+/* fullscreen overlay */
+.fs-overlay{position:fixed;inset:0;background:var(--bg);z-index:400;display:none;align-items:center;justify-content:center;padding:24px}
+.fs-overlay.show{display:flex}
+.fs-close{position:absolute;top:16px;right:18px;padding:8px 15px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel);color:var(--text);font:inherit;font-weight:700;font-size:.85rem;cursor:pointer;z-index:2}
+.fs-close:hover{border-color:var(--accent);color:var(--accent)}
+.fs-body{width:100%;height:100%;display:flex;align-items:center;justify-content:center}
+.fs-body svg{max-width:94vw;max-height:88vh;height:auto;width:auto}
+.fs-body canvas{width:min(88vw,84vh);height:min(88vw,84vh);touch-action:none;cursor:grab}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand">
+      <span class="logo">📐</span>
+      <span>Cuerpos Geométricos<small>v3 · Prof. Héctor Hoyos</small></span>
+    </div>
+    <nav class="nav" id="nav">
+      <button data-sec="intro" class="active">🏠 Introducción</button>
+      <span class="navlbl">Temas</span>
+      <button data-sec="cilindro">🥫 Cilindro</button>
+      <button data-sec="cono">🍦 Cono</button>
+      <button data-sec="cubo">🧊 Cubo</button>
+      <button data-sec="piramide">🔺 Pirámide</button>
+      <button data-sec="esfera">⚽ Esfera</button>
+      <button data-sec="ortoedro">📦 Prisma</button>
+      <span class="navlbl">Práctica</span>
+      <button data-sec="ejercicios">✏️ Ejercicios</button>
+      <button data-sec="calculadora">🧮 Calculadora</button>
+      <button data-sec="contexto">🌾 Contexto</button>
+      <button data-sec="repositorio">📚 Repositorio</button>
+    </nav>
+    <div class="side-foot">
+      <button class="tbtn" id="shareBtn" title="Compartir / descargar la app" style="width:auto;padding:0 11px;gap:6px;font-size:.78rem;font-weight:700">📤 Compartir</button>
+      <button class="tbtn" id="themeBtn" title="Modo claro / oscuro">🌙</button>
+    </div>
+  </aside>
+
+  <main class="main" id="main">
+    <div class="wrap">
+      <!-- ============ INTRO ============ -->
+      <section class="sec show" id="sec-intro"></section>
+      <!-- ============ TEORÍA (por figura) ============ -->
+      <section class="sec" id="sec-cubo"></section>
+      <section class="sec" id="sec-ortoedro"></section>
+      <section class="sec" id="sec-piramide"></section>
+      <section class="sec" id="sec-cilindro"></section>
+      <section class="sec" id="sec-cono"></section>
+      <section class="sec" id="sec-esfera"></section>
+      <!-- ============ EJERCICIOS ============ -->
+      <section class="sec" id="sec-ejercicios"></section>
+      <!-- ============ CONTEXTO ============ -->
+      <section class="sec" id="sec-contexto"></section>
+      <!-- ============ REPOSITORIO ============ -->
+      <section class="sec repo-sec" id="sec-repositorio"></section>
+      <!-- ============ CALCULADORA ============ -->
+      <section class="sec" id="sec-calculadora"></section>
+
+      <div class="foot">
+        📐 <b>Cuerpos Geométricos v3</b> — Recurso educativo offline · Geometría del espacio<br>
+        Prof. Héctor Hoyos · Postprimaria Rural
+      </div>
+    </div>
+  </main>
+</div>
+
+<div class="modal-ov" id="shareOv">
+  <div class="modal">
+    <h3>📤 Compartir / descargar</h3>
+    <p>Esta app funciona <b>sin internet</b>. Descárgala o compártela con tus estudiantes para usarla en el PC o el celular.</p>
+    <div class="mrow">
+      <button class="mbtn" id="shDown"><span class="me">💾</span> Descargar la app (archivo offline)</button>
+      <button class="mbtn" id="shShare"><span class="me">📲</span> Compartir a PC o celular…</button>
+      <button class="mbtn" id="shCopy"><span class="me">🔗</span> Copiar enlace</button>
+      <button class="mbtn" id="shWa"><span class="me">🟢</span> Enviar por WhatsApp</button>
+    </div>
+    <button class="mclose" id="shClose">Cerrar</button>
+  </div>
+</div>
+
+<div class="fs-overlay" id="fsOv">
+  <button class="fs-close" id="fsClose">✕ Cerrar</button>
+  <div class="fs-body" id="fsBody"></div>
+</div>
+
+<script>
+"use strict";
+/* =========================================================
+   Cuerpos Geométricos v3  —  app educativa offline
+   Sin dependencias externas. Motor de fórmulas + SVG + PDF.
+   ========================================================= */
+var PI = Math.PI;
+
+/* ---- formato numérico (es-CO: coma decimal, punto de miles) ---- */
+function fmt(n, dec){
+  if(n===null||n===undefined||!isFinite(n)) return '—';
+  dec = (dec===undefined)?2:dec;
+  return Number(n).toLocaleString('es-CO',{minimumFractionDigits:0,maximumFractionDigits:dec});
+}
+function fpi(coef){ return fmt(coef)+'π'; }
+function sq(x){return x*x;}
+function frac(n,d){return '<span class="frac"><span class="n">'+n+'</span><span class="d">'+d+'</span></span>';}
+var FSICON='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/></svg>';
+var FILLICON='<svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm2 8l3 3 5-6"/></svg>';
+function P(t,body){return '<div class="paso"><span class="pt">'+t+'</span>'+body+'</div>';}
+function RES(body){return '<div class="res">'+body+'</div>';}
+function eq(s){return '<div class="eqwrap">'+s+'</div>';}
+
+/* =========================================================
+   MOTOR DE FÓRMULAS  —  cada solver devuelve {html, R}
+   ========================================================= */
+function solCubo(a,u){u=u||'cm';
+  var AL=4*a*a, AT=6*a*a, V=a*a*a, d=a*Math.sqrt(3);
+  var h='';
+  h+=P('1. Datos','Arista <b>a = '+fmt(a)+' '+u+'</b>');
+  h+=P('2. Área lateral (4 caras)', eq('A<sub>L</sub> = 4·a² = 4·('+fmt(a)+')² = <b>'+fmt(AL)+' '+u+'²</b>'));
+  h+=P('3. Área total (6 caras)', eq('A<sub>T</sub> = 6·a² = 6·('+fmt(a)+')² = <b>'+fmt(AT)+' '+u+'²</b>'));
+  h+=P('4. Volumen', eq('V = a³ = ('+fmt(a)+')³ = <b>'+fmt(V)+' '+u+'³</b>'));
+  h+=P('5. Diagonal', eq('d = a·√3 = '+fmt(a)+'·1,7321 = <b>'+fmt(d)+' '+u+'</b>'));
+  h+=RES('A<sub>L</sub>=<span class="ok">'+fmt(AL)+' '+u+'²</span> · A<sub>T</sub>=<span class="ok">'+fmt(AT)+' '+u+'²</span> · V=<span class="ok">'+fmt(V)+' '+u+'³</span>');
+  return {html:h, R:{AL:AL,AT:AT,V:V,d:d}};
+}
+function solOrtoedro(l,w,hh,u){u=u||'cm';
+  var AL=2*(l+w)*hh, AT=2*(l*w+l*hh+w*hh), V=l*w*hh, d=Math.sqrt(l*l+w*w+hh*hh);
+  var h='';
+  h+=P('1. Datos','Largo <b>a='+fmt(l)+'</b>, ancho <b>b='+fmt(w)+'</b>, alto <b>c='+fmt(hh)+'</b> ('+u+')');
+  h+=P('2. Área lateral', eq('A<sub>L</sub> = 2·(a+b)·c = 2·('+fmt(l)+'+'+fmt(w)+')·'+fmt(hh)+' = <b>'+fmt(AL)+' '+u+'²</b>'));
+  h+=P('3. Área total', eq('A<sub>T</sub> = 2·(ab+ac+bc) = 2·('+fmt(l*w)+'+'+fmt(l*hh)+'+'+fmt(w*hh)+') = <b>'+fmt(AT)+' '+u+'²</b>'));
+  h+=P('4. Volumen', eq('V = a·b·c = '+fmt(l)+'·'+fmt(w)+'·'+fmt(hh)+' = <b>'+fmt(V)+' '+u+'³</b>'));
+  h+=P('5. Diagonal', eq('d = √(a²+b²+c²) = √('+fmt(l*l+w*w+hh*hh)+') = <b>'+fmt(d)+' '+u+'</b>'));
+  h+=RES('A<sub>L</sub>=<span class="ok">'+fmt(AL)+' '+u+'²</span> · A<sub>T</sub>=<span class="ok">'+fmt(AT)+' '+u+'²</span> · V=<span class="ok">'+fmt(V)+' '+u+'³</span>');
+  return {html:h, R:{AL:AL,AT:AT,V:V,d:d}};
+}
+function solPiramide(a,hh,u){u=u||'cm';
+  var ap=Math.sqrt(hh*hh+(a/2)*(a/2)), per=4*a, AL=per*ap/2, Ab=a*a, AT=AL+Ab, V=(1/3)*a*a*hh;
+  var h='';
+  h+=P('1. Datos','Base cuadrada de lado <b>a='+fmt(a)+' '+u+'</b>, altura <b>h='+fmt(hh)+' '+u+'</b>');
+  h+=P('2. Apotema de la pirámide', eq('a<sub>p</sub> = √(h² + (a/2)²) = √('+fmt(hh*hh)+' + '+fmt((a/2)*(a/2))+') = <b>'+fmt(ap)+' '+u+'</b>'));
+  h+=P('3. Área lateral', eq('A<sub>L</sub> = (Perímetro · a<sub>p</sub>) / 2 = ('+fmt(per)+'·'+fmt(ap)+')/2 = <b>'+fmt(AL)+' '+u+'²</b>'));
+  h+=P('4. Área total', eq('A<sub>T</sub> = A<sub>L</sub> + A<sub>base</sub> = '+fmt(AL)+' + '+fmt(Ab)+' = <b>'+fmt(AT)+' '+u+'²</b>'));
+  h+=P('5. Volumen', eq('V = '+frac('1','3')+'·A<sub>base</sub>·h = '+frac('1','3')+'·'+fmt(Ab)+'·'+fmt(hh)+' = <b>'+fmt(V)+' '+u+'³</b>'));
+  h+=RES('A<sub>L</sub>=<span class="ok">'+fmt(AL)+' '+u+'²</span> · A<sub>T</sub>=<span class="ok">'+fmt(AT)+' '+u+'²</span> · V=<span class="ok">'+fmt(V)+' '+u+'³</span>');
+  return {html:h, R:{AL:AL,AT:AT,V:V,ap:ap}};
+}
+function solCilindro(r,hh,u){u=u||'cm';
+  var AL=2*PI*r*hh, AT=2*PI*r*(hh+r), V=PI*r*r*hh;
+  var h='';
+  h+=P('1. Datos','Radio <b>r='+fmt(r)+' '+u+'</b>, altura <b>h='+fmt(hh)+' '+u+'</b>');
+  h+=P('2. Área lateral', eq('A<sub>L</sub> = 2·π·r·h = 2π('+fmt(r)+')('+fmt(hh)+') = '+fpi(2*r*hh)+' ≈ <b>'+fmt(AL)+' '+u+'²</b>'));
+  h+=P('3. Área total', eq('A<sub>T</sub> = 2·π·r·(h+r) = 2π('+fmt(r)+')('+fmt(hh+r)+') = '+fpi(2*r*(hh+r))+' ≈ <b>'+fmt(AT)+' '+u+'²</b>'));
+  h+=P('4. Volumen', eq('V = π·r²·h = π('+fmt(r)+')²('+fmt(hh)+') = '+fpi(r*r*hh)+' ≈ <b>'+fmt(V)+' '+u+'³</b>'));
+  h+=RES('A<sub>L</sub>=<span class="ok">'+fmt(AL)+' '+u+'²</span> · A<sub>T</sub>=<span class="ok">'+fmt(AT)+' '+u+'²</span> · V=<span class="ok">'+fmt(V)+' '+u+'³</span>');
+  return {html:h, R:{AL:AL,AT:AT,V:V}};
+}
+function solCono(r,hh,u){u=u||'cm';
+  var g=Math.sqrt(r*r+hh*hh), AL=PI*r*g, AT=PI*r*(g+r), V=(1/3)*PI*r*r*hh;
+  var h='';
+  h+=P('1. Datos','Radio <b>r='+fmt(r)+' '+u+'</b>, altura <b>h='+fmt(hh)+' '+u+'</b>');
+  h+=P('2. Generatriz', eq('g = √(r²+h²) = √('+fmt(r*r)+'+'+fmt(hh*hh)+') = <b>'+fmt(g)+' '+u+'</b>'));
+  h+=P('3. Área lateral', eq('A<sub>L</sub> = π·r·g = π('+fmt(r)+')('+fmt(g)+') = '+fpi(r*g)+' ≈ <b>'+fmt(AL)+' '+u+'²</b>'));
+  h+=P('4. Área total', eq('A<sub>T</sub> = π·r·(g+r) = π('+fmt(r)+')('+fmt(g+r)+') = '+fpi(r*(g+r))+' ≈ <b>'+fmt(AT)+' '+u+'²</b>'));
+  h+=P('5. Volumen', eq('V = '+frac('1','3')+'·π·r²·h = '+frac('1','3')+'π('+fmt(r)+')²('+fmt(hh)+') = '+fpi(r*r*hh/3)+' ≈ <b>'+fmt(V)+' '+u+'³</b>'));
+  h+=RES('g=<span class="ok">'+fmt(g)+' '+u+'</span> · A<sub>L</sub>=<span class="ok">'+fmt(AL)+' '+u+'²</span> · A<sub>T</sub>=<span class="ok">'+fmt(AT)+' '+u+'²</span> · V=<span class="ok">'+fmt(V)+' '+u+'³</span>');
+  return {html:h, R:{AL:AL,AT:AT,V:V,g:g}};
+}
+function solEsfera(r,u){u=u||'cm';
+  var A=4*PI*r*r, V=(4/3)*PI*r*r*r;
+  var h='';
+  h+=P('1. Datos','Radio <b>r='+fmt(r)+' '+u+'</b>');
+  h+=P('2. Área (superficie)', eq('A = 4·π·r² = 4π('+fmt(r)+')² = '+fpi(4*r*r)+' ≈ <b>'+fmt(A)+' '+u+'²</b>'));
+  h+=P('3. Volumen', eq('V = '+frac('4','3')+'·π·r³ = '+frac('4','3')+'π('+fmt(r)+')³ = '+fpi(4*r*r*r/3)+' ≈ <b>'+fmt(V)+' '+u+'³</b>'));
+  h+=RES('A=<span class="ok">'+fmt(A)+' '+u+'²</span> · V=<span class="ok">'+fmt(V)+' '+u+'³</span>');
+  return {html:h, R:{A:A,AT:A,V:V}};
+}
+var DISP={cubo:solCubo,ortoedro:solOrtoedro,piramide:solPiramide,cilindro:solCilindro,cono:solCono,esfera:solEsfera};
+
+/* =========================================================
+   FIGURAS SVG  (calculadora)  —  DRAW[fig](vals, u) -> svg
+   ========================================================= */
+/* etiquetas de figura: texto matemático (cursiva Cambria Math), sin negrita */
+function mlab(x,y,t,anchor,col){return '<text x="'+x+'" y="'+y+'" fill="var('+(col||'--accent-2')+')" font-size="15" font-style="italic" font-weight="400" text-anchor="'+(anchor||'middle')+'" font-family="Cambria Math,Cambria,Times New Roman,serif">'+t+'</text>';}
+function svgWrap(inner,vb){return '<svg viewBox="0 0 '+(vb||'300 300')+'" xmlns="http://www.w3.org/2000/svg" style="stroke:var(--fig-stroke);fill:var(--fig-fill)">'+inner+'</svg>';}
+var DRAW={
+ cubo:function(v,u){var a=v[0];var s='';
+   s+='<rect x="70" y="120" width="130" height="130" fill="var(--fig-fill)" stroke-width="2.5"/>';
+   s+='<path d="M70 120 L120 70 L250 70 L200 120" fill="var(--fig-fill2)" stroke-width="2.5"/>';
+   s+='<path d="M200 120 L250 70 L250 200 L200 250" fill="var(--fig-fill2)" stroke-width="2.5"/>';
+   s+=mlab(135,290,'a = '+fmt(a)+' '+u);
+   return svgWrap(s,'300 320');},
+ ortoedro:function(v,u){var l=v[0],w=v[1],h=v[2];var s='';
+   s+='<rect x="60" y="130" width="150" height="100" fill="var(--fig-fill)" stroke-width="2.5"/>';
+   s+='<path d="M60 130 L110 80 L260 80 L210 130" fill="var(--fig-fill2)" stroke-width="2.5"/>';
+   s+='<path d="M210 130 L260 80 L260 180 L210 230" fill="var(--fig-fill2)" stroke-width="2.5"/>';
+   s+=mlab(135,255,'a = '+fmt(l)+' '+u);
+   s+=mlab(250,215,'c = '+fmt(h)+' '+u,'start');
+   s+=mlab(185,70,'b = '+fmt(w)+' '+u);
+   return svgWrap(s,'340 290');},
+ piramide:function(v,u){var a=v[0],h=v[1];var s='';
+   s+='<path d="M150 40 L60 210 L200 250 L290 175 Z" fill="var(--fig-fill2)" stroke-width="2.5"/>';
+   s+='<path d="M150 40 L60 210 L200 250" fill="var(--fig-fill)" stroke-width="2.5"/>';
+   s+='<line x1="150" y1="40" x2="150" y2="222" stroke-dasharray="5 4" stroke-width="1.6"/>';
+   s+=mlab(120,285,'a = '+fmt(a)+' '+u);
+   s+=mlab(160,140,'h = '+fmt(h)+' '+u,'start');
+   return svgWrap(s,'300 300');},
+ cilindro:function(v,u){var r=v[0],h=v[1];var s='';
+   s+='<ellipse cx="150" cy="70" rx="85" ry="26" fill="var(--fig-fill2)" stroke-width="2.5"/>';
+   s+='<path d="M65 70 L65 240 M235 70 L235 240" stroke-width="2.5" fill="none"/>';
+   s+='<path d="M65 240 A85 26 0 0 0 235 240" stroke-width="2.5" fill="var(--fig-fill)"/>';
+   s+='<line x1="150" y1="70" x2="235" y2="70" stroke-dasharray="5 4" stroke-width="1.6"/>';
+   s+=mlab(190,62,'r = '+fmt(r)+' '+u);
+   s+=mlab(245,160,'h = '+fmt(h)+' '+u,'start');
+   return svgWrap(s,'340 290');},
+ cono:function(v,u){var r=v[0],h=v[1];var g=Math.sqrt(r*r+h*h);var s='';
+   s+='<path d="M150 40 L65 235 A85 26 0 0 0 235 235 Z" fill="var(--fig-fill2)" stroke-width="2.5"/>';
+   s+='<ellipse cx="150" cy="235" rx="85" ry="26" fill="var(--fig-fill)" stroke-width="2.5"/>';
+   s+='<line x1="150" y1="40" x2="150" y2="235" stroke-dasharray="5 4" stroke-width="1.6"/>';
+   s+='<line x1="150" y1="235" x2="235" y2="235" stroke-dasharray="5 4" stroke-width="1.6"/>';
+   s+=mlab(195,228,'r = '+fmt(r)+' '+u);
+   s+=mlab(158,150,'h = '+fmt(h)+' '+u,'start');
+   s+=mlab(72,130,'g = '+fmt(g),'start','--accent');
+   return svgWrap(s,'300 290');},
+ esfera:function(v,u){var r=v[0];var s='';
+   s+='<circle cx="150" cy="150" r="105" fill="var(--fig-fill)" stroke-width="2.5"/>';
+   s+='<ellipse cx="150" cy="150" rx="105" ry="34" fill="none" stroke-dasharray="5 4" stroke-width="1.4"/>';
+   s+='<line x1="150" y1="150" x2="255" y2="150" stroke-width="2"/>';
+   s+='<circle cx="150" cy="150" r="4" fill="var(--fig-stroke)"/>';
+   s+=mlab(200,140,'r = '+fmt(r)+' '+u,'start');
+   return svgWrap(s,'300 300');}
+};
+
+/* =========================================================
+   DIAGRAMAS ANATÓMICOS (teoría) — DIAG[fig]() -> svg con partes
+   ========================================================= */
+function dLine(a,b,c,d){return '<line x1="'+a+'" y1="'+b+'" x2="'+c+'" y2="'+d+'" stroke="var(--accent-2)" stroke-width="1.1" stroke-dasharray="3 3"/>';}
+function dDot(x,y){return '<circle cx="'+x+'" cy="'+y+'" r="3.4" fill="var(--accent-2)" stroke="none"/>';}
+function dTxt(x,y,t,an){return '<text x="'+x+'" y="'+y+'" fill="var(--text)" font-size="13" font-weight="400" text-anchor="'+(an||'start')+'" font-family="Segoe UI,sans-serif">'+t+'</text>';}
+function dPart(px,py,lx,ly,t,an){return dLine(px,py,lx,ly)+dDot(px,py)+dTxt(lx+((an==='end')?-7:7),ly+4,t,an);}
+var DIAG={
+ cubo:function(){var s='';
+   s+='<path d="M100 90 L150 50 L270 50 L220 90 Z" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<path d="M220 90 L270 50 L270 170 L220 210 Z" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<rect x="100" y="90" width="120" height="120" fill="var(--fig-fill)" stroke-width="2.2"/>';
+   s+=dPart(270,50,286,54,'Vértice','start');
+   s+=dPart(220,150,286,142,'Arista','start');
+   s+=dPart(150,150,86,150,'Cara','end');
+   return svgWrap(s,'380 260');},
+ ortoedro:function(){var s='';
+   s+='<path d="M95 90 L140 55 L290 55 L245 90 Z" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<path d="M245 90 L290 55 L290 150 L245 185 Z" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<rect x="95" y="90" width="150" height="95" fill="var(--fig-fill)" stroke-width="2.2"/>';
+   s+=dPart(267,72,306,66,'Ancho (b)','start');
+   s+=dPart(245,137,306,142,'Alto (c)','start');
+   s+=dPart(170,185,170,213,'Largo (a)','middle');
+   s+=dPart(160,118,66,108,'Cara','end');
+   s+=dPart(95,150,66,166,'Arista','end');
+   return svgWrap(s,'400 240');},
+ piramide:function(){var s='';
+   s+='<path d="M150 40 L60 210 L290 175 Z" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<path d="M150 40 L60 210 L200 255 Z" fill="var(--fig-fill)" stroke-width="2.2"/>';
+   s+='<path d="M150 40 L200 255 L290 175 Z" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<line x1="150" y1="40" x2="150" y2="225" stroke="var(--fig-stroke)" stroke-dasharray="5 4" stroke-width="1.4"/>';
+   s+='<line x1="150" y1="40" x2="130" y2="232" stroke="var(--accent)" stroke-width="1.6"/>';
+   s+=dPart(150,40,165,34,'Vértice (cúspide)','start');
+   s+=dPart(150,150,163,152,'Altura (h)','start');
+   s+=dPart(140,138,30,120,'Apotema (aₚ)','end');
+   s+=dPart(200,255,215,266,'Base','start');
+   s+=dPart(105,150,20,182,'Cara lateral','end');
+   return svgWrap(s,'380 290');},
+ cilindro:function(){var s='';
+   s+='<path d="M70 65 L70 255 M230 65 L230 255" stroke-width="2.2" fill="none"/>';
+   s+='<path d="M70 255 A80 24 0 0 0 230 255" fill="var(--fig-fill)" stroke-width="2.2"/>';
+   s+='<ellipse cx="150" cy="65" rx="80" ry="24" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<line x1="150" y1="65" x2="230" y2="65" stroke="var(--accent)" stroke-width="1.5"/>';
+   s+='<line x1="150" y1="65" x2="150" y2="255" stroke="var(--fig-stroke)" stroke-dasharray="5 4" stroke-width="1.2"/>';
+   s+=dPart(150,41,252,40,'Base','start');
+   s+=dPart(193,65,190,50,'Radio (r)','middle');
+   s+=dPart(230,158,300,158,'Altura (h)','start');
+   s+=dPart(70,158,60,158,'Cara lateral','end');
+   s+=dPart(150,279,252,280,'Base','start');
+   return svgWrap(s,'380 300');},
+ cono:function(){var s='';
+   s+='<path d="M150 40 L70 250 A80 24 0 0 0 230 250 Z" fill="var(--fig-fill2)" stroke-width="2.2"/>';
+   s+='<ellipse cx="150" cy="250" rx="80" ry="24" fill="var(--fig-fill)" stroke-width="2.2"/>';
+   s+='<line x1="150" y1="40" x2="150" y2="250" stroke="var(--fig-stroke)" stroke-dasharray="5 4" stroke-width="1.2"/>';
+   s+='<line x1="150" y1="250" x2="230" y2="250" stroke="var(--accent)" stroke-width="1.5"/>';
+   s+=dPart(150,40,165,34,'Vértice','start');
+   s+=dPart(192,148,300,120,'Generatriz (g)','start');
+   s+=dPart(150,165,158,178,'Altura (h)','start');
+   s+=dPart(193,250,188,236,'Radio (r)','middle');
+   s+=dPart(150,275,300,276,'Base','start');
+   return svgWrap(s,'420 300');},
+ esfera:function(){var s='';
+   s+='<circle cx="150" cy="150" r="100" fill="var(--fig-fill)" stroke-width="2.2"/>';
+   s+='<ellipse cx="150" cy="150" rx="100" ry="32" fill="none" stroke-dasharray="5 4" stroke-width="1.2"/>';
+   s+='<line x1="50" y1="150" x2="250" y2="150" stroke="var(--accent)" stroke-width="1.2" stroke-dasharray="4 3"/>';
+   s+='<line x1="150" y1="150" x2="234" y2="82" stroke="var(--accent)" stroke-width="1.6"/>';
+   s+='<circle cx="150" cy="150" r="3.6" fill="var(--fig-stroke)"/>';
+   s+=dPart(220,82,300,72,'Superficie','start');
+   s+=dPart(193,116,300,116,'Radio (r)','start');
+   s+=dPart(150,150,66,150,'Centro','end');
+   s+=dPart(92,150,60,178,'Diámetro (d)','end');
+   return svgWrap(s,'360 300');}
+};
+
+/* =========================================================
+   TEORÍA POR FIGURA
+   ========================================================= */
+var FIG={
+ cubo:{em:'🧊',nom:'Cubo',tipo:'Poliedro regular (hexaedro)',fn:'cubo',
+  teoria:'El <b>cubo</b> o <b>hexaedro regular</b> es un poliedro formado por <b>6 caras cuadradas iguales</b>. Es uno de los cinco sólidos platónicos. Todas sus aristas miden lo mismo (la arista <b>a</b>) y en cada vértice concurren 3 caras.',
+  elem:[['Cara','Cada una de las 6 superficies cuadradas planas.'],['Arista','Segmento donde se unen dos caras. El cubo tiene 12 aristas iguales de longitud a.'],['Vértice','Punto donde concurren tres aristas. El cubo tiene 8 vértices.'],['Diagonal','Segmento que une dos vértices opuestos: d = a·√3.']],
+  form:[['Área lateral','A_L = 4·a²','(las 4 caras laterales)'],['Área total','A_T = 6·a²','(las 6 caras)'],['Volumen','V = a³','(arista al cubo)']],
+  ej:[{e:'Calcula el área lateral, el área total y el volumen de un cubo cuya arista mide <b>5 cm</b>.',fn:'cubo',a:[5]},
+      {e:'Una caja con forma de cubo tiene <b>8 cm</b> de arista. Halla cuánta cartulina se necesita para forrarla (área total) y cuánto espacio ocupa (volumen).',fn:'cubo',a:[8]}]},
+ ortoedro:{em:'📦',nom:'Prisma rectangular',tipo:'Poliedro — Ortoedro (paralelepípedo recto)',fn:'ortoedro',
+  teoria:'El <b>prisma rectangular</b> u <b>ortoedro</b> es un poliedro de <b>6 caras rectangulares</b> (los lados opuestos son iguales). Queda definido por tres medidas: <b>largo (a)</b>, <b>ancho (b)</b> y <b>alto (c)</b>. Una caja, un ladrillo o un libro tienen esta forma. Si las tres medidas son iguales, se convierte en un cubo.',
+  elem:[['Caras','6 caras rectangulares, iguales dos a dos.'],['Aristas','12 aristas: 4 de largo, 4 de ancho y 4 de alto.'],['Vértices','8 vértices.'],['Diagonal','d = √(a²+b²+c²).']],
+  form:[['Área lateral','A_L = 2·(a+b)·c','(caras laterales)'],['Área total','A_T = 2·(a·b + a·c + b·c)','(todas las caras)'],['Volumen','V = a·b·c','(largo × ancho × alto)']],
+  ej:[{e:'Halla el área lateral, el área total y el volumen de un prisma rectangular de <b>largo 8 cm, ancho 5 cm y alto 4 cm</b>.',fn:'ortoedro',a:[8,5,4]},
+      {e:'Una caja de zapatos mide <b>30 cm × 18 cm × 12 cm</b>. ¿Cuánto papel se necesita para forrarla (área total) y cuánto espacio ocupa?',fn:'ortoedro',a:[30,18,12]}]},
+ piramide:{em:'🔺',nom:'Pirámide',tipo:'Poliedro — Pirámide cuadrangular regular',fn:'piramide',
+  teoria:'La <b>pirámide</b> es un poliedro con una <b>base poligonal</b> y caras laterales triangulares que se unen en un punto llamado <b>vértice o cúspide</b>. Trabajaremos la <b>pirámide cuadrangular regular</b>: base cuadrada de lado <b>a</b> y altura <b>h</b> (del vértice al centro de la base). La <b>apotema de la pirámide</b> (a<sub>p</sub>) es la altura de una cara triangular.',
+  elem:[['Base','Polígono sobre el que se apoya (aquí, un cuadrado de lado a).'],['Caras laterales','Triángulos que se unen en la cúspide.'],['Altura (h)','Distancia del vértice al centro de la base.'],['Apotema (a_p)','Altura de una cara triangular: a_p = √(h² + (a/2)²).']],
+  form:[['Apotema','a_p = √(h² + (a/2)²)','(por Pitágoras)'],['Área lateral','A_L = (Perímetro · a_p) / 2',''],['Área total','A_T = A_L + A_base','(A_base = a²)'],['Volumen','V = (1/3)·A_base·h','']],
+  ej:[{e:'Calcula la apotema, el área lateral, el área total y el volumen de una pirámide de base cuadrada de <b>lado 6 cm</b> y <b>altura 4 cm</b>.',fn:'piramide',a:[6,4]},
+      {e:'Una pirámide cuadrangular tiene base de <b>lado 10 cm</b> y <b>altura 12 cm</b>. Halla su área total y su volumen.',fn:'piramide',a:[10,12]}]},
+ cilindro:{em:'🥫',nom:'Cilindro',tipo:'Cuerpo redondo',fn:'cilindro',
+  teoria:'Un <b>cilindro</b> es un sólido limitado por <b>dos caras circulares iguales</b> (las bases) y una <b>superficie curva</b> (la cara lateral). Al desarrollarlo aparecen las dos bases de radio <b>r</b> y un <b>rectángulo</b> cuyo ancho es la altura <b>h</b> y cuyo largo es la longitud de la circunferencia de la base (2πr). Latas, tubos y baldes tienen esta forma.',
+  elem:[['Bases','Dos círculos iguales de radio r.'],['Cara lateral','Superficie curva que, desarrollada, es un rectángulo de lados 2πr y h.'],['Radio (r)','Radio de las bases.'],['Altura (h)','Distancia entre las dos bases.']],
+  form:[['Área lateral','A_L = 2·π·r·h','(el rectángulo)'],['Área total','A_T = 2·π·r·(h + r)','(lateral + 2 bases)'],['Volumen','V = π·r²·h','(área de la base × altura)']],
+  ej:[{e:'Calcula el área total y el volumen de un cilindro cuyo radio mide <b>6 cm</b> y cuya altura es de <b>0,12 m</b>.<br><span class="note">Primero pasa la altura a cm: 0,12 m = 12 cm.</span>',fn:'cilindro',a:[6,12]},
+      {e:'Halla el área lateral, el área total y el volumen de un cilindro de <b>radio 3 cm</b> y <b>altura 8 cm</b>.',fn:'cilindro',a:[3,8]}]},
+ cono:{em:'🍦',nom:'Cono',tipo:'Cuerpo redondo (sólido de revolución)',fn:'cono',
+  teoria:'Un <b>cono recto</b> es un sólido de revolución generado por el giro de un <b>triángulo rectángulo</b> alrededor de uno de sus catetos. El círculo formado por el otro cateto es la <b>base</b> y el punto donde confluyen las generatrices es el <b>vértice</b>. La <b>generatriz (g)</b> es la hipotenusa: g = √(r² + h²). Conos de helado y gorros de fiesta tienen esta forma.',
+  elem:[['Base','Círculo de radio r sobre el que se apoya el cono.'],['Vértice','Punto donde se unen todas las generatrices.'],['Altura (h)','Distancia del vértice al centro de la base.'],['Generatriz (g)','Hipotenusa del triángulo: g = √(h² + r²).']],
+  form:[['Generatriz','g = √(r² + h²)','(Pitágoras)'],['Área lateral','A_L = π·r·g','(el sector circular)'],['Área total','A_T = π·r·(g + r)','(lateral + base)'],['Volumen','V = (1/3)·π·r²·h','(un tercio del cilindro)']],
+  ej:[{e:'Calcula el área lateral, el área total y el volumen de un cono de <b>radio 3 m</b> y <b>altura 4 m</b>.',fn:'cono',a:[3,4]},
+      {e:'Para una fiesta, Luís hizo <b>gorros cónicos</b> de <b>radio 15 cm</b> y <b>generatriz 25 cm</b>. Halla la altura, el área lateral (cartón de cada gorro) y el volumen.<br><span class="note">Como g=25 y r=15, la altura es h=√(g²−r²)=20 cm.</span>',fn:'cono',a:[15,20]}]},
+ esfera:{em:'⚽',nom:'Esfera',tipo:'Cuerpo redondo',fn:'esfera',
+  teoria:'Una <b>esfera</b> es el cuerpo redondo formado por todos los puntos del espacio que están a la misma distancia (el <b>radio r</b>) de un punto central. No tiene caras planas, aristas ni vértices. Balones, canicas y planetas tienen esta forma. Su superficie equivale a 4 círculos máximos.',
+  elem:[['Centro','Punto interior equidistante de toda la superficie.'],['Radio (r)','Distancia del centro a la superficie.'],['Diámetro (d)','Cuerda que pasa por el centro: d = 2r.'],['Superficie','Área curva: A = 4·π·r² (equivale a 4 círculos máximos).']],
+  form:[['Área (superficie)','A = 4·π·r²',''],['Volumen','V = (4/3)·π·r³','']],
+  ej:[{e:'Calcula el área de la superficie y el volumen de una esfera de <b>radio 6 cm</b>.',fn:'esfera',a:[6]},
+      {e:'Un balón de fútbol tiene un <b>radio de 11 cm</b>. Halla cuánto cuero cubre su superficie (área) y cuánto aire cabe dentro (volumen).',fn:'esfera',a:[11]}]}
+};
+var ORDEN=['cilindro','cono','cubo','piramide','esfera','ortoedro'];
+
+/* =========================================================
+   BANCO DE EJERCICIOS  (10 por figura, 3 niveles)
+   niv: 'f'=Fácil  'm'=Medio  'd'=Difícil
+   ========================================================= */
+var EJ=[
+ /* ---- CUBO ---- */
+ {fig:'cubo',niv:'f',e:'Halla A_L, A_T y V de un cubo de arista 4 cm.',fn:'cubo',a:[4]},
+ {fig:'cubo',niv:'f',e:'Halla A_L, A_T y V de un cubo de arista 7 cm.',fn:'cubo',a:[7]},
+ {fig:'cubo',niv:'f',e:'Un cubo tiene arista 10 cm. Calcula sus áreas y su volumen.',fn:'cubo',a:[10]},
+ {fig:'cubo',niv:'m',e:'Calcula el área total y el volumen de un cubo de arista 2,5 cm.',fn:'cubo',a:[2.5]},
+ {fig:'cubo',niv:'m',e:'Un cubo tiene 15 cm de arista. Halla su área total, su volumen y su diagonal.',fn:'cubo',a:[15]},
+ {fig:'cubo',niv:'m',e:'Un cubo mide 0,5 m de arista. Calcula su área total y su volumen en metros.',fn:'cubo',a:[0.5],u:'m'},
+ {fig:'cubo',niv:'m',e:'Un dado grande tiene 3,2 cm de arista. Halla su área total y su volumen.',fn:'cubo',a:[3.2]},
+ {fig:'cubo',niv:'d',e:'Una caja cúbica de 30 cm de arista se va a forrar con papel de regalo. ¿Cuánto papel (área total) se necesita? Además, ¿cuánto espacio ocupa?',fn:'cubo',a:[30]},
+ {fig:'cubo',niv:'d',e:'Un tanque con forma de cubo tiene 2 m de arista. ¿Cuántos <b>litros</b> de agua caben si se llena por completo? (1 m³ = 1000 L).',fn:'cubo',a:[2],u:'m',post:function(R){return P('6. Conversión a litros', eq('V = '+fmt(R.V)+' m³ × 1000 = <b>'+fmt(R.V*1000,0)+' litros</b>'));}},
+ {fig:'cubo',niv:'d',e:'El volumen de un cubo es 125 cm³. Halla su arista y su área total.',custom:function(){var V=125,a=Math.cbrt(V),AT=6*a*a;return P('1. Datos','V = 125 cm³')+P('2. Arista (raíz cúbica del volumen)', eq('a = ∛V = ∛125 = <b>'+fmt(a)+' cm</b>'))+P('3. Área total', eq('A_T = 6·a² = 6·('+fmt(a)+')² = <b>'+fmt(AT)+' cm²</b>'))+RES('a = <span class="ok">'+fmt(a)+' cm</span> · A_T = <span class="ok">'+fmt(AT)+' cm²</span>');}},
+ /* ---- ORTOEDRO ---- */
+ {fig:'ortoedro',niv:'f',e:'Halla A_L, A_T y V de un prisma rectangular de 8 × 5 × 4 cm.',fn:'ortoedro',a:[8,5,4]},
+ {fig:'ortoedro',niv:'f',e:'Halla A_L, A_T y V de un prisma rectangular de 10 × 6 × 3 cm.',fn:'ortoedro',a:[10,6,3]},
+ {fig:'ortoedro',niv:'f',e:'Un ortoedro mide 12 cm de largo, 4 cm de ancho y 5 cm de alto. Calcula sus áreas y volumen.',fn:'ortoedro',a:[12,4,5]},
+ {fig:'ortoedro',niv:'m',e:'Calcula el área total y el volumen de un prisma rectangular de 2,5 × 1,5 × 3 cm.',fn:'ortoedro',a:[2.5,1.5,3]},
+ {fig:'ortoedro',niv:'m',e:'Un prisma rectangular mide 0,4 × 0,3 × 0,2 m. Halla su área total y su volumen.',fn:'ortoedro',a:[0.4,0.3,0.2],u:'m'},
+ {fig:'ortoedro',niv:'m',e:'Halla la diagonal, el área total y el volumen de un prisma de 20 × 15 × 10 cm.',fn:'ortoedro',a:[20,15,10]},
+ {fig:'ortoedro',niv:'m',e:'Un bloque mide 7 × 7 × 12 cm. Calcula su área lateral, área total y volumen.',fn:'ortoedro',a:[7,7,12]},
+ {fig:'ortoedro',niv:'d',e:'Una caja de zapatos de 30 × 18 × 12 cm se va a forrar. ¿Cuánto papel (área total) se necesita?',fn:'ortoedro',a:[30,18,12]},
+ {fig:'ortoedro',niv:'d',e:'Un acuario tiene forma de ortoedro de 50 × 30 × 40 cm. ¿Cuántos <b>litros</b> de agua le caben? (1000 cm³ = 1 L).',fn:'ortoedro',a:[50,30,40],post:function(R){return P('Conversión a litros', eq('V = '+fmt(R.V,0)+' cm³ ÷ 1000 = <b>'+fmt(R.V/1000)+' litros</b>'));}},
+ {fig:'ortoedro',niv:'d',e:'Un ladrillo mide 24 × 12 × 8 cm. ¿Cuántos ladrillos se necesitan para llenar un espacio de 1 m³? (1 m³ = 1 000 000 cm³).',fn:'ortoedro',a:[24,12,8],post:function(R){return P('¿Cuántos ladrillos en 1 m³?', eq('1 000 000 ÷ '+fmt(R.V,0)+' ≈ <b>'+fmt(1000000/R.V,0)+' ladrillos</b>'));}},
+ /* ---- PIRÁMIDE ---- */
+ {fig:'piramide',niv:'f',e:'Halla apotema, A_L, A_T y V de una pirámide de base cuadrada lado 6 cm y altura 4 cm.',fn:'piramide',a:[6,4]},
+ {fig:'piramide',niv:'f',e:'Pirámide cuadrangular de lado 10 cm y altura 12 cm. Calcula sus áreas y volumen.',fn:'piramide',a:[10,12]},
+ {fig:'piramide',niv:'f',e:'Pirámide de base cuadrada lado 8 cm y altura 3 cm. Halla A_L, A_T y V.',fn:'piramide',a:[8,3]},
+ {fig:'piramide',niv:'m',e:'Calcula el área total y el volumen de una pirámide cuadrangular de lado 5 cm y altura 6 cm.',fn:'piramide',a:[5,6]},
+ {fig:'piramide',niv:'m',e:'Pirámide de base cuadrada lado 12 cm y altura 8 cm. Halla apotema, área total y volumen.',fn:'piramide',a:[12,8]},
+ {fig:'piramide',niv:'m',e:'Pirámide cuadrangular de lado 2 m y altura 1,5 m. Calcula su área total y su volumen.',fn:'piramide',a:[2,1.5],u:'m'},
+ {fig:'piramide',niv:'m',e:'Pirámide de base cuadrada lado 14 cm y altura 24 cm. Halla A_L, A_T y V.',fn:'piramide',a:[14,24]},
+ {fig:'piramide',niv:'d',e:'El techo de un quiosco es una pirámide de base cuadrada de 6 m de lado y 4 m de altura. ¿Cuánta teja (área lateral) se necesita para cubrirlo?',fn:'piramide',a:[6,4],u:'m'},
+ {fig:'piramide',niv:'d',e:'Una carpa piramidal tiene base cuadrada de 3 m de lado y 2,5 m de altura. Halla el volumen de aire que contiene.',fn:'piramide',a:[3,2.5],u:'m'},
+ {fig:'piramide',niv:'d',e:'Una pirámide de base cuadrada tiene 9 cm de lado y su apotema (de la cara) mide 7,5 cm. Halla su altura, su área total y su volumen.',custom:function(){var a=9,ap=7.5,h=Math.sqrt(ap*ap-(a/2)*(a/2)),AL=4*a*ap/2,AT=AL+a*a,V=(1/3)*a*a*h;return P('1. Datos','a = 9 cm, apotema a_p = 7,5 cm')+P('2. Altura (Pitágoras)', eq('h = √(a_p² − (a/2)²) = √(56,25 − 20,25) = √36 = <b>'+fmt(h)+' cm</b>'))+P('3. Área lateral', eq('A_L = (4·a·a_p)/2 = (4·9·7,5)/2 = <b>'+fmt(AL)+' cm²</b>'))+P('4. Área total', eq('A_T = A_L + a² = '+fmt(AL)+' + 81 = <b>'+fmt(AT)+' cm²</b>'))+P('5. Volumen', eq('V = '+frac('1','3')+'·a²·h = '+frac('1','3')+'·81·'+fmt(h)+' = <b>'+fmt(V)+' cm³</b>'))+RES('h=<span class="ok">'+fmt(h)+' cm</span> · A_T=<span class="ok">'+fmt(AT)+' cm²</span> · V=<span class="ok">'+fmt(V)+' cm³</span>');}},
+ /* ---- CILINDRO ---- */
+ {fig:'cilindro',niv:'f',e:'Halla A_L, A_T y V de un cilindro de radio 3 cm y altura 8 cm.',fn:'cilindro',a:[3,8]},
+ {fig:'cilindro',niv:'f',e:'Halla A_L, A_T y V de un cilindro de radio 5 cm y altura 10 cm.',fn:'cilindro',a:[5,10]},
+ {fig:'cilindro',niv:'f',e:'Cilindro de radio 6 cm y altura 12 cm. Calcula sus áreas y volumen.',fn:'cilindro',a:[6,12]},
+ {fig:'cilindro',niv:'m',e:'Calcula A_L, A_T y V de un cilindro de radio 0,4 cm y altura 0,75 cm.',fn:'cilindro',a:[0.4,0.75]},
+ {fig:'cilindro',niv:'m',e:'Un cilindro tiene radio 2 m y altura 0,5 m. Halla su área total y su volumen.',fn:'cilindro',a:[2,0.5],u:'m'},
+ {fig:'cilindro',niv:'m',e:'Cilindro de radio 20 cm y altura 70 cm. Calcula A_L, A_T y V.',fn:'cilindro',a:[20,70]},
+ {fig:'cilindro',niv:'m',e:'Un tubo cilíndrico tiene radio 1,5 cm y 40 cm de largo. Halla su área lateral y su volumen.',fn:'cilindro',a:[1.5,40]},
+ {fig:'cilindro',niv:'d',e:'Se van a fabricar 10 botes cilíndricos de 10 cm de diámetro (r=5 cm) y 20 cm de altura. ¿Cuánta hojalata (área total × 10) se necesita?',fn:'cilindro',a:[5,20],post:function(R){return P('Hojalata para 10 botes', eq('10 × A_T = 10 × '+fmt(R.AT)+' = <b>'+fmt(R.AT*10)+' cm²</b>'));}},
+ {fig:'cilindro',niv:'d',e:'Un tanque cilíndrico tiene 1,5 m de radio y 3 m de altura. ¿Cuántos <b>litros</b> de agua caben? (1 m³ = 1000 L).',fn:'cilindro',a:[1.5,3],u:'m',post:function(R){return P('Capacidad en litros', eq('V = '+fmt(R.V)+' m³ × 1000 = <b>'+fmt(R.V*1000,0)+' litros</b>'));}},
+ {fig:'cilindro',niv:'d',e:'Un cilindro tiene por altura la misma longitud que la circunferencia de su base. Si la altura es 125,66 cm, calcula el radio, el área total y el volumen.',custom:function(){var h=125.66,r=h/(2*PI),AT=2*PI*r*(h+r),V=PI*r*r*h;return P('1. Idea clave','h = longitud de la circunferencia = 2πr')+P('2. Despejar el radio', eq('r = h / (2π) = 125,66 / 6,2832 = <b>'+fmt(r)+' cm</b>'))+P('3. Área total', eq('A_T = 2πr(h+r) = 2π('+fmt(r)+')('+fmt(h+r)+') ≈ <b>'+fmt(AT)+' cm²</b>'))+P('4. Volumen', eq('V = πr²h = π('+fmt(r)+')²(125,66) ≈ <b>'+fmt(V)+' cm³</b>'))+RES('r=<span class="ok">'+fmt(r)+' cm</span> · A_T=<span class="ok">'+fmt(AT)+' cm²</span> · V=<span class="ok">'+fmt(V)+' cm³</span>');}},
+ /* ---- CONO ---- */
+ {fig:'cono',niv:'f',e:'Halla g, A_L, A_T y V de un cono de radio 3 cm y altura 4 cm.',fn:'cono',a:[3,4]},
+ {fig:'cono',niv:'f',e:'Cono de radio 6 cm y altura 8 cm. Calcula generatriz, áreas y volumen.',fn:'cono',a:[6,8]},
+ {fig:'cono',niv:'f',e:'Cono de radio 5 cm y altura 12 cm. Halla g, A_L, A_T y V.',fn:'cono',a:[5,12]},
+ {fig:'cono',niv:'m',e:'Calcula todo (g, A_L, A_T, V) de un cono de radio 9 cm y altura 12 cm.',fn:'cono',a:[9,12]},
+ {fig:'cono',niv:'m',e:'Un cono tiene generatriz 13 cm y radio 5 cm. Halla su altura, su área lateral y su volumen.<br><span class="note">h = √(g²−r²) = √(169−25) = 12 cm.</span>',fn:'cono',a:[5,12]},
+ {fig:'cono',niv:'m',e:'Cono de radio 0,5 m y altura 1,2 m. Halla generatriz, área total y volumen.',fn:'cono',a:[0.5,1.2],u:'m'},
+ {fig:'cono',niv:'m',e:'Cono de radio 7 cm y altura 24 cm. Calcula g, A_L, A_T y V.',fn:'cono',a:[7,24]},
+ {fig:'cono',niv:'d',e:'Para una fiesta, Luís hizo 10 gorros cónicos de radio 15 cm y generatriz 25 cm. ¿Cuánto cartón (área lateral × 10) usó?<br><span class="note">h = √(25²−15²) = 20 cm.</span>',fn:'cono',a:[15,20],post:function(R){return P('Cartón para 10 gorros', eq('10 × A_L = 10 × '+fmt(R.AL)+' = <b>'+fmt(R.AL*10)+' cm²</b>'));}},
+ {fig:'cono',niv:'d',e:'Un montón de arena tiene forma de cono de 2 m de radio y 1,5 m de altura. ¿Qué volumen de arena hay?',fn:'cono',a:[2,1.5],u:'m'},
+ {fig:'cono',niv:'d',e:'Un cono tiene área lateral 0,19 m² y generatriz 0,4 m. Halla el radio y el volumen.',custom:function(){var AL=0.19,g=0.4,r=AL/(PI*g),h=Math.sqrt(g*g-r*r),V=(1/3)*PI*r*r*h;return P('1. Datos','A_L = 0,19 m², g = 0,4 m')+P('2. Radio (despejando de A_L = πrg)', eq('r = A_L / (π·g) = 0,19 / (π·0,4) = 0,19 / 1,2566 ≈ <b>'+fmt(r)+' m</b>'))+P('3. Altura (Pitágoras)', eq('h = √(g²−r²) = √(0,16 − '+fmt(r*r,4)+') ≈ <b>'+fmt(h)+' m</b>'))+P('4. Volumen', eq('V = '+frac('1','3')+'πr²h ≈ <b>'+fmt(V,4)+' m³</b>'))+RES('r=<span class="ok">'+fmt(r)+' m</span> · V=<span class="ok">'+fmt(V,4)+' m³</span>');}},
+ /* ---- ESFERA ---- */
+ {fig:'esfera',niv:'f',e:'Halla el área y el volumen de una esfera de radio 3 cm.',fn:'esfera',a:[3]},
+ {fig:'esfera',niv:'f',e:'Halla el área y el volumen de una esfera de radio 6 cm.',fn:'esfera',a:[6]},
+ {fig:'esfera',niv:'f',e:'Una esfera tiene radio 10 cm. Calcula su superficie y su volumen.',fn:'esfera',a:[10]},
+ {fig:'esfera',niv:'m',e:'Calcula el área y el volumen de una esfera de radio 2,5 cm.',fn:'esfera',a:[2.5]},
+ {fig:'esfera',niv:'m',e:'Una esfera tiene radio 0,5 m. Halla su área y su volumen.',fn:'esfera',a:[0.5],u:'m'},
+ {fig:'esfera',niv:'m',e:'Esfera de radio 15 cm. Calcula su superficie y su volumen.',fn:'esfera',a:[15]},
+ {fig:'esfera',niv:'m',e:'Una esfera tiene 20 cm de diámetro. Halla su área y su volumen.<br><span class="note">r = d/2 = 10 cm.</span>',fn:'esfera',a:[10]},
+ {fig:'esfera',niv:'d',e:'Un balón de fútbol tiene 11 cm de radio. ¿Cuánto cuero (superficie) lo cubre y cuánto aire (volumen) contiene?',fn:'esfera',a:[11]},
+ {fig:'esfera',niv:'d',e:'Un tanque esférico de gas tiene 1,5 m de radio. ¿Cuántos <b>litros</b> caben? (1 m³ = 1000 L).',fn:'esfera',a:[1.5],u:'m',post:function(R){return P('Capacidad en litros', eq('V = '+fmt(R.V)+' m³ × 1000 = <b>'+fmt(R.V*1000,0)+' litros</b>'));}},
+ {fig:'esfera',niv:'d',e:'La superficie de una esfera es 314,16 cm². Halla su radio y su volumen.',custom:function(){var A=314.16,r=Math.sqrt(A/(4*PI)),V=(4/3)*PI*r*r*r;return P('1. Datos','A = 314,16 cm²')+P('2. Radio (despejando de A = 4πr²)', eq('r = √(A / 4π) = √(314,16 / 12,566) = √25 = <b>'+fmt(r)+' cm</b>'))+P('3. Volumen', eq('V = '+frac('4','3')+'πr³ = '+frac('4','3')+'π('+fmt(r)+')³ ≈ <b>'+fmt(V)+' cm³</b>'))+RES('r=<span class="ok">'+fmt(r)+' cm</span> · V=<span class="ok">'+fmt(V)+' cm³</span>');}}
+];
+
+/* =========================================================
+   REPOSITORIO DE PREGUNTAS  (30, selección múltiple)
+   ok = índice de la opción correcta (0..3)
+   ========================================================= */
+var QZ=[
+ {q:'¿Qué es un cuerpo geométrico?',o:['Una figura plana de dos dimensiones','Una figura de tres dimensiones que ocupa un lugar en el espacio','Una línea recta','Un punto en el plano'],ok:1,x:'Los cuerpos geométricos son figuras de 3 dimensiones (largo, ancho y alto) y por eso tienen volumen.'},
+ {q:'Los cuerpos geométricos se dividen principalmente en:',o:['Cuadrados y círculos','Poliedros y cuerpos redondos','Rectas y curvas','Grandes y pequeños'],ok:1,x:'Según su superficie: poliedros (caras planas) y cuerpos redondos (superficies curvas).'},
+ {q:'¿Cuál de los siguientes es un cuerpo redondo?',o:['El cubo','La pirámide','El cilindro','El prisma'],ok:2,x:'Los principales cuerpos redondos son el cilindro, el cono y la esfera.'},
+ {q:'El punto donde concurren tres o más aristas se llama:',o:['Cara','Arista','Vértice','Base'],ok:2,x:'El vértice es el punto donde se encuentran varias aristas.'},
+ {q:'¿Cuántas caras tiene un cubo?',o:['4','6','8','12'],ok:1,x:'El cubo (hexaedro) tiene 6 caras cuadradas iguales.'},
+ {q:'¿Cuántas aristas tiene un cubo?',o:['6','8','12','24'],ok:2,x:'El cubo tiene 12 aristas iguales y 8 vértices.'},
+ {q:'El volumen de un cubo de arista a se calcula con:',o:['V = 6a²','V = a³','V = 4a²','V = a·√3'],ok:1,x:'El volumen del cubo es la arista al cubo: V = a³.'},
+ {q:'El área total de un cubo de arista a es:',o:['4a²','a³','6a²','2a'],ok:2,x:'Son 6 caras cuadradas iguales: A_T = 6a².'},
+ {q:'Un cubo tiene arista 5 cm. Su volumen es:',o:['25 cm³','125 cm³','150 cm³','75 cm³'],ok:1,x:'V = a³ = 5³ = 125 cm³.'},
+ {q:'La diagonal de un cubo de arista a es:',o:['a·√2','a·√3','2a','3a'],ok:1,x:'La diagonal interna del cubo es d = a·√3.'},
+ {q:'El volumen de un prisma rectangular (ortoedro) es:',o:['V = a+b+c','V = a·b·c','V = 2(ab+ac+bc)','V = a³'],ok:1,x:'El volumen es el producto de sus tres dimensiones: V = a·b·c.'},
+ {q:'Un ortoedro de 4 × 3 × 2 cm tiene un volumen de:',o:['9 cm³','24 cm³','12 cm³','26 cm³'],ok:1,x:'V = 4·3·2 = 24 cm³.'},
+ {q:'El área total de un prisma rectangular se calcula con:',o:['2(ab+ac+bc)','a·b·c','4a²','π r²'],ok:0,x:'A_T = 2·(ab + ac + bc), sumando el área de las 6 caras.'},
+ {q:'¿Cuántas caras laterales triangulares tiene una pirámide cuadrangular?',o:['3','4','5','6'],ok:1,x:'Una base cuadrada genera 4 caras laterales triangulares.'},
+ {q:'La apotema de una pirámide cuadrangular de lado a y altura h es:',o:['√(h²+(a/2)²)','h+a','a·√3','2·a·h'],ok:0,x:'Por Pitágoras: a_p = √(h² + (a/2)²).'},
+ {q:'El volumen de una pirámide es:',o:['A_base · h','(1/3)·A_base·h','2·A_base·h','A_base + h'],ok:1,x:'El volumen de la pirámide es un tercio del área de la base por la altura.'},
+ {q:'En un cilindro, las dos caras planas iguales se llaman:',o:['Vértices','Generatrices','Bases','Aristas'],ok:2,x:'El cilindro tiene dos bases circulares iguales de radio r.'},
+ {q:'El área lateral de un cilindro es:',o:['π r²','2π r h','(1/3)π r² h','4π r²'],ok:1,x:'La cara lateral desarrollada es un rectángulo: A_L = 2π r h.'},
+ {q:'El volumen de un cilindro de radio r y altura h es:',o:['2π r h','π r² h','(1/3)π r² h','4/3 π r³'],ok:1,x:'V = π r² h (área de la base por la altura).'},
+ {q:'El área total de un cilindro es:',o:['2π r (h + r)','π r h','6 r²','π r² + h'],ok:0,x:'A_T = 2π r (h + r) = área lateral + las dos bases.'},
+ {q:'Un cono recto se genera al girar un triángulo rectángulo alrededor de:',o:['su hipotenusa','uno de sus catetos','su base media','un vértice'],ok:1,x:'El cono es un sólido de revolución: gira un triángulo rectángulo sobre un cateto.'},
+ {q:'La generatriz de un cono se calcula con:',o:['g = r + h','g = √(r² + h²)','g = r·h','g = 2π r'],ok:1,x:'La generatriz es la hipotenusa: g = √(r² + h²).'},
+ {q:'El área lateral de un cono es:',o:['π r g','2π r h','π r²','4π r²'],ok:0,x:'A_L = π·r·g, siendo g la generatriz.'},
+ {q:'El volumen de un cono es:',o:['π r² h','(1/3)π r² h','2π r h','π r g'],ok:1,x:'El cono tiene un tercio del volumen de un cilindro de igual base y altura.'},
+ {q:'Un cono tiene r = 3 y h = 4. Su generatriz es:',o:['5','7','12','25'],ok:0,x:'g = √(3² + 4²) = √25 = 5.'},
+ {q:'La esfera tiene:',o:['6 caras','2 bases','Ninguna cara, arista ni vértice','12 aristas'],ok:2,x:'La esfera es totalmente curva: no tiene caras planas, aristas ni vértices.'},
+ {q:'El área de la superficie de una esfera es:',o:['4π r²','(4/3)π r³','π r²','2π r'],ok:0,x:'A = 4π r², equivalente a 4 círculos máximos.'},
+ {q:'El volumen de una esfera es:',o:['4π r²','(4/3)π r³','π r² h','2π r³'],ok:1,x:'V = (4/3)·π·r³.'},
+ {q:'Para calcular con un cilindro de radio 6 cm y altura 0,12 m, primero debemos:',o:['Sumar 6 + 0,12','Usar las medidas tal cual','Pasar todo a la misma unidad (0,12 m = 12 cm)','Multiplicar 6 × 0,12'],ok:2,x:'Siempre se expresan las medidas en la misma unidad antes de operar.'},
+ {q:'Si un cilindro y un cono tienen la misma base y la misma altura, el volumen del cono es:',o:['El doble del cilindro','La mitad del cilindro','Un tercio del cilindro','Igual al cilindro'],ok:2,x:'V_cono = (1/3)·V_cilindro cuando comparten base y altura.'}
+];
+
+/* =========================================================
+   UTILIDADES DE RENDER
+   ========================================================= */
+function subsFmt(s){return s.replace(/A_L/g,'A<sub>L</sub>').replace(/A_T/g,'A<sub>T</sub>').replace(/A_base/g,'A<sub>base</sub>').replace(/a_p/g,'a<sub>p</sub>').replace(/V_cono/g,'V<sub>cono</sub>').replace(/V_cilindro/g,'V<sub>cilindro</sub>');}
+var NIVN={f:['Fácil','f'],m:['Medio','m'],d:['Difícil','d']};
+
+function resolverEj(ej){
+  if(ej.custom) return {html:ej.custom(), R:null};
+  var out=DISP[ej.fig?ej.fig:ej.fn].apply(null, ej.a.concat([ej.u||'cm']));
+  var html=out.html;
+  if(ej.post) html+=out.R?ej.post(out.R):'';
+  return {html:html, R:out.R};
+}
+
+/* ---------- INTRODUCCIÓN ---------- */
+function renderIntro(){
+  var h='';
+  h+='<div class="hero"><span class="deco">📐</span><h1>Cuerpos Geométricos</h1><p>Explora los sólidos del espacio: su teoría, sus elementos, sus fórmulas y ejemplos resueltos paso a paso. Practica con 60 ejercicios, repasa 30 preguntas y usa la calculadora interactiva que dibuja cada figura.</p></div>';
+  h+='<div class="card"><h2>🧩 ¿Qué es un cuerpo geométrico?</h2>'+
+     '<p>Un <b>sólido</b> o <b>cuerpo geométrico</b> es una figura de <b>tres dimensiones</b> (largo, ancho y alto) que ocupa un lugar en el espacio y, por lo tanto, tiene <b>volumen</b>.</p>'+
+     '<h3>🔩 Elementos básicos</h3><ul class="clean">'+
+     '<li><b>Cara:</b> cada superficie (plana o curva) que limita el cuerpo.</li>'+
+     '<li><b>Arista:</b> segmento donde se unen dos caras.</li>'+
+     '<li><b>Vértice:</b> punto donde concurren varias aristas.</li></ul>'+
+     '<h3>📚 Clasificación</h3><div class="grid2">'+
+     '<div><ul class="clean"><li><b>Poliedros:</b> todas sus caras son planas (cubo, prisma, pirámide).</li></ul></div>'+
+     '<div><ul class="clean"><li><b>Cuerpos redondos:</b> tienen superficies curvas (cilindro, cono, esfera).</li></ul></div></div></div>';
+  h+='<div class="card"><h2>🗂️ Figuras que estudiaremos</h2><p class="note">Toca una figura para ir a su teoría completa.</p><div class="grid-cards" style="margin-top:12px">';
+  ORDEN.forEach(function(k){var f=FIG[k];h+='<div class="figlink" onclick="goTo(\''+k+'\')"><span class="em">'+f.em+'</span><b>'+f.nom+'</b><span>'+f.tipo+'</span></div>';});
+  h+='</div></div>';
+  document.getElementById('sec-intro').innerHTML=h;
+}
+
+/* ---------- TEORÍA POR FIGURA ---------- */
+function renderFigura(k){
+  var f=FIG[k],h='';
+  h+='<div class="hero"><span class="deco">'+f.em+'</span><h1>'+f.em+' '+f.nom+'</h1><p>'+f.tipo+'</p></div>';
+  h+='<div class="card"><h2>📖 Teoría</h2><p>'+f.teoria+'</p>';
+  h+='<div class="two-col">';
+  if(DIAG[k]) h+='<div class="diagram-box">'+DIAG[k]()+'<button class="fs-btn" title="Pantalla completa" onclick="fsDiag(\''+k+'\')">'+FSICON+'</button><div class="cap">🔎 Partes del '+f.nom.toLowerCase()+'</div></div>';
+  h+='<div class="v3d-box"><canvas id="cv3d_'+k+'"></canvas><button class="fs-btn fs-btn2" id="fillbtn_'+k+'" title="Rellenar / silueta" onclick="toggleSolid(\''+k+'\')">'+FILLICON+'</button><button class="fs-btn" title="Pantalla completa" onclick="fsOpen3D(\''+k+'\')">'+FSICON+'</button><div class="v3d-cap">🔄 Arrastra para rotar · 🎨 Rellenar · ⛶ Pantalla completa</div></div>';
+  h+='</div>';
+  h+='<div class="fig-tools"><button class="btn btn-g" onclick="pdfTeoria(\''+k+'\')">🖨️ Imprimir teoría completa</button>'+
+     (NET[k]?'<button class="btn btn-g" onclick="pdfPlantilla(\''+k+'\')">✂️ Plantilla recortable</button>':'')+'</div>';
+  h+='<h3>🔩 Elementos</h3><ul class="clean">';
+  f.elem.forEach(function(e){h+='<li><b>'+e[0]+':</b> '+subsFmt(e[1])+'</li>';});
+  h+='</ul><h3>📐 Fórmulas</h3>';
+  f.form.forEach(function(fo){h+='<div class="formula"><span class="lbl">'+fo[0]+'</span><span>'+subsFmt(fo[1])+'</span>'+(fo[2]?'<span class="note" style="margin-left:auto">'+fo[2]+'</span>':'')+'</div>';});
+  h+='</div>';
+  h+='<div class="card"><h2>💡 Ejemplos resueltos</h2>';
+  f.ej.forEach(function(ej,i){
+    var out=DISP[ej.fn].apply(null, ej.a.concat([ej.u||'cm']));
+    h+='<div class="ejemplo" id="ej_'+k+'_'+i+'"><div class="eh"><b>Ejemplo '+(i+1)+'</b>'+
+       '<div class="ehbtns"><button class="btn btn-g" id="ejb_'+k+'_'+i+'" onclick="toggleEjemplo(\''+k+'\','+i+')">👁️ Ver ejemplo</button>'+
+       '<button class="btn btn-wa" onclick="waEjemplo(\''+k+'\','+i+')">🟢 WhatsApp</button>'+
+       '<button class="btn btn-pdf" onclick="pdfEjemplo(\''+k+'\','+i+')">📄 PDF</button></div></div>'+
+       '<div class="eb"><p class="enun">'+subsFmt(ej.e)+'</p><div class="sol">'+out.html+'</div></div></div>';
+  });
+  h+='</div>';
+  document.getElementById('sec-'+k).innerHTML=h;
+}
+
+/* ---------- EJERCICIOS ---------- */
+var exFig='cilindro', exNiv='todos';
+function renderEjercicios(){
+  var h='';
+  h+='<div class="hero"><span class="deco">✏️</span><h1>Ejercicios</h1><p>60 ejercicios (10 por figura) en tres niveles. Resuélvelos, revisa la solución paso a paso y descarga cualquiera en PDF.</p></div>';
+  h+='<div class="exbar"><div class="grp" id="exFigBar"></div><div class="grp" id="exNivBar"></div></div>';
+  h+='<div id="exList"></div>';
+  document.getElementById('sec-ejercicios').innerHTML=h;
+  var fb=document.getElementById('exFigBar');
+  ORDEN.forEach(function(k){var b=document.createElement('button');b.className='btn btn-o'+(k===exFig?' active':'');b.innerHTML=FIG[k].em+' '+FIG[k].nom;b.onclick=function(){exFig=k;renderExList();syncExBars();};fb.appendChild(b);});
+  var nb=document.getElementById('exNivBar');
+  [['todos','Todos'],['f','Fácil'],['m','Medio'],['d','Difícil']].forEach(function(n){var b=document.createElement('button');b.className='btn btn-o'+(n[0]===exNiv?' active':'');b.textContent=n[1];b.onclick=function(){exNiv=n[0];renderExList();syncExBars();};nb.appendChild(b);});
+  renderExList();
+}
+function syncExBars(){
+  var fb=document.getElementById('exFigBar').children,nb=document.getElementById('exNivBar').children,i;
+  for(i=0;i<fb.length;i++)fb[i].classList.toggle('active',ORDEN[i]===exFig);
+  var nv=['todos','f','m','d'];for(i=0;i<nb.length;i++)nb[i].classList.toggle('active',nv[i]===exNiv);
+}
+function renderExList(){
+  var list=document.getElementById('exList'),h='',n=0;
+  EJ.forEach(function(ej,idx){
+    if(ej.fig!==exFig) return;
+    if(exNiv!=='todos'&&ej.niv!==exNiv) return;
+    n++;
+    var nv=NIVN[ej.niv];
+    h+='<div class="excard" id="ex'+idx+'"><div class="xh"><div class="xn"><span class="num">'+n+'</span><span>'+FIG[ej.fig].nom+'</span></div><span class="pill '+nv[1]+'">'+nv[0]+'</span></div>'+
+       '<p class="enun">'+subsFmt(ej.e)+'</p>'+
+       '<div class="xactions"><button class="btn btn-g" id="exb'+idx+'" onclick="toggleEx('+idx+')">👁️ Ver solución</button>'+
+       '<button class="btn btn-wa" onclick="waEj('+idx+')">🟢 WhatsApp</button>'+
+       '<button class="btn btn-pdf" onclick="pdfEj('+idx+','+n+')">📄 PDF</button></div>'+
+       '<div class="sol">'+resolverEj(ej).html+'</div></div>';
+  });
+  if(!n)h='<div class="card"><p class="note">No hay ejercicios con ese filtro.</p></div>';
+  list.innerHTML=h;
+}
+function toggleEx(idx){var c=document.getElementById('ex'+idx);if(!c)return;c.classList.toggle('open');var b=document.getElementById('exb'+idx);if(b)b.innerHTML=c.classList.contains('open')?'🙈 Ocultar solución':'👁️ Ver solución';}
+function toggleEjemplo(k,i){var c=document.getElementById('ej_'+k+'_'+i);if(!c)return;c.classList.toggle('open');var b=document.getElementById('ejb_'+k+'_'+i);if(b)b.innerHTML=c.classList.contains('open')?'🙈 Ocultar ejemplo':'👁️ Ver ejemplo';}
+
+/* ---------- REPOSITORIO ---------- */
+function renderRepositorio(){
+  var h='';
+  h+='<div class="hero" style="flex-shrink:0"><span class="deco">📚</span><h1>Repositorio de preguntas</h1><p>30 preguntas de selección múltiple con única respuesta. La opción correcta aparece resaltada con su explicación. Descarga todo el banco en PDF.</p></div>';
+  h+='<div class="card" style="flex-shrink:0;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px"><b>'+QZ.length+' preguntas · respuestas y explicaciones</b><button class="btn btn-pdf" onclick="pdfRepo()">📄 PDF de todo el repositorio</button></div>';
+  h+='<div class="repo-list">';
+  QZ.forEach(function(q,i){
+    h+='<div class="qcard"><div class="qq"><span class="num">'+(i+1)+'</span><span>'+subsFmt(q.q)+'</span></div><ul class="opts">';
+    q.o.forEach(function(op,j){h+='<li'+(j===q.ok?' class="correct"':'')+'><span class="lt">'+String.fromCharCode(65+j)+'</span><span>'+subsFmt(op)+(j===q.ok?' &nbsp;✓':'')+'</span></li>';});
+    h+='</ul><div class="exp"><b>Respuesta correcta: '+String.fromCharCode(65+q.ok)+'.</b> '+subsFmt(q.x)+'</div></div>';
+  });
+  h+='</div>';
+  document.getElementById('sec-repositorio').innerHTML=h;
+}
+
+/* ---------- CALCULADORA ---------- */
+var CALC={
+ cubo:{campos:[['a','Arista (a)',5]]},
+ ortoedro:{campos:[['l','Largo (a)',8],['w','Ancho (b)',5],['h','Alto (c)',4]]},
+ piramide:{campos:[['a','Lado de la base (a)',6],['h','Altura (h)',4]]},
+ cilindro:{campos:[['r','Radio (r)',6],['h','Altura (h)',12]]},
+ cono:{campos:[['r','Radio (r)',3],['h','Altura (h)',4]]},
+ esfera:{campos:[['r','Radio (r)',6]]}
+};
+/* ---- CALCULADORA INVERSA: recetas por figura ---- */
+function invRow(l,v,un){return '<div class="resrow"><span class="k">'+l+'</span><span class="v">'+fmt(v)+' '+un+'</span></div>';}
+var INV={
+ cubo:[
+  {lbl:'Conozco el Volumen → arista',campos:[['V','Volumen (V)',125]],solve:function(v,u){var V=v[0],a=Math.cbrt(V),AT=6*a*a,AL=4*a*a;return{fa:[a],rows:invRow('Arista',a,u)+invRow('Área total',AT,u+'²')+invRow('Área lateral',AL,u+'²'),html:P('1. Dato','V = '+fmt(V)+' '+u+'³')+P('2. Arista (raíz cúbica)',eq('a = ∛V = ∛'+fmt(V)+' = <b>'+fmt(a)+' '+u+'</b>'))+P('3. Áreas',eq('A<sub>T</sub> = 6a² = <b>'+fmt(AT)+' '+u+'²</b>'))};}},
+  {lbl:'Conozco el Área total → arista',campos:[['AT','Área total (A_T)',150]],solve:function(v,u){var AT=v[0],a=Math.sqrt(AT/6),V=a*a*a;return{fa:[a],rows:invRow('Arista',a,u)+invRow('Volumen',V,u+'³'),html:P('1. Dato','A<sub>T</sub> = '+fmt(AT)+' '+u+'²')+P('2. Arista',eq('a = √(A<sub>T</sub>/6) = √('+fmt(AT/6)+') = <b>'+fmt(a)+' '+u+'</b>'))+P('3. Volumen',eq('V = a³ = <b>'+fmt(V)+' '+u+'³</b>'))};}}
+ ],
+ esfera:[
+  {lbl:'Conozco el Área → radio',campos:[['A','Área (A)',314.16]],solve:function(v,u){var A=v[0],r=Math.sqrt(A/(4*PI)),V=(4/3)*PI*r*r*r;return{fa:[r],rows:invRow('Radio',r,u)+invRow('Volumen',V,u+'³'),html:P('1. Dato','A = '+fmt(A)+' '+u+'²')+P('2. Radio (de A = 4πr²)',eq('r = √(A/4π) = √('+fmt(A/(4*PI))+') = <b>'+fmt(r)+' '+u+'</b>'))+P('3. Volumen',eq('V = 4/3·πr³ = <b>'+fmt(V)+' '+u+'³</b>'))};}},
+  {lbl:'Conozco el Volumen → radio',campos:[['V','Volumen (V)',904.78]],solve:function(v,u){var V=v[0],r=Math.cbrt(3*V/(4*PI)),A=4*PI*r*r;return{fa:[r],rows:invRow('Radio',r,u)+invRow('Área',A,u+'²'),html:P('1. Dato','V = '+fmt(V)+' '+u+'³')+P('2. Radio (de V = 4/3·πr³)',eq('r = ∛(3V/4π) = <b>'+fmt(r)+' '+u+'</b>'))+P('3. Área',eq('A = 4πr² = <b>'+fmt(A)+' '+u+'²</b>'))};}}
+ ],
+ cilindro:[
+  {lbl:'Conozco V y radio → altura',campos:[['V','Volumen (V)',1357.17],['r','Radio (r)',6]],solve:function(v,u){var V=v[0],r=v[1],hh=V/(PI*r*r),AL=2*PI*r*hh;return{fa:[r,hh],rows:invRow('Altura',hh,u)+invRow('Área lateral',AL,u+'²'),html:P('1. Datos','V = '+fmt(V)+' '+u+'³, r = '+fmt(r)+' '+u)+P('2. Altura (de V = πr²h)',eq('h = V/(πr²) = '+fmt(V)+'/('+fmt(PI*r*r)+') = <b>'+fmt(hh)+' '+u+'</b>'))};}},
+  {lbl:'Conozco V y altura → radio',campos:[['V','Volumen (V)',1357.17],['h','Altura (h)',12]],solve:function(v,u){var V=v[0],hh=v[1],r=Math.sqrt(V/(PI*hh)),AL=2*PI*r*hh;return{fa:[r,hh],rows:invRow('Radio',r,u)+invRow('Área lateral',AL,u+'²'),html:P('1. Datos','V = '+fmt(V)+' '+u+'³, h = '+fmt(hh)+' '+u)+P('2. Radio (de V = πr²h)',eq('r = √(V/(πh)) = √('+fmt(V/(PI*hh))+') = <b>'+fmt(r)+' '+u+'</b>'))};}}
+ ],
+ cono:[
+  {lbl:'Conozco V y radio → altura',campos:[['V','Volumen (V)',37.7],['r','Radio (r)',3]],solve:function(v,u){var V=v[0],r=v[1],hh=3*V/(PI*r*r),g=Math.sqrt(r*r+hh*hh);return{fa:[r,hh],rows:invRow('Altura',hh,u)+invRow('Generatriz',g,u),html:P('1. Datos','V = '+fmt(V)+' '+u+'³, r = '+fmt(r)+' '+u)+P('2. Altura (de V = 1/3·πr²h)',eq('h = 3V/(πr²) = <b>'+fmt(hh)+' '+u+'</b>'))+P('3. Generatriz',eq('g = √(r²+h²) = <b>'+fmt(g)+' '+u+'</b>'))};}},
+  {lbl:'Conozco área lateral y radio → generatriz',campos:[['AL','Área lateral (A_L)',47.12],['r','Radio (r)',3]],solve:function(v,u){var AL=v[0],r=v[1],g=AL/(PI*r),hh=Math.sqrt(Math.max(g*g-r*r,0));return{fa:[r,hh],rows:invRow('Generatriz',g,u)+invRow('Altura',hh,u),html:P('1. Datos','A<sub>L</sub> = '+fmt(AL)+' '+u+'², r = '+fmt(r)+' '+u)+P('2. Generatriz (de A<sub>L</sub> = πrg)',eq('g = A<sub>L</sub>/(πr) = <b>'+fmt(g)+' '+u+'</b>'))+P('3. Altura',eq('h = √(g²−r²) = <b>'+fmt(hh)+' '+u+'</b>'))};}}
+ ],
+ piramide:[
+  {lbl:'Conozco V y lado de la base → altura',campos:[['V','Volumen (V)',48],['a','Lado (a)',6]],solve:function(v,u){var V=v[0],a=v[1],hh=3*V/(a*a),ap=Math.sqrt(hh*hh+(a/2)*(a/2)),AL=2*a*ap;return{fa:[a,hh],rows:invRow('Altura',hh,u)+invRow('Apotema',ap,u)+invRow('Área lateral',AL,u+'²'),html:P('1. Datos','V = '+fmt(V)+' '+u+'³, a = '+fmt(a)+' '+u)+P('2. Altura (de V = 1/3·a²h)',eq('h = 3V/a² = <b>'+fmt(hh)+' '+u+'</b>'))};}}
+ ],
+ ortoedro:[
+  {lbl:'Conozco V, largo y ancho → alto',campos:[['V','Volumen (V)',160],['l','Largo (a)',8],['w','Ancho (b)',5]],solve:function(v,u){var V=v[0],l=v[1],w=v[2],hh=V/(l*w),AT=2*(l*w+l*hh+w*hh);return{fa:[l,w,hh],rows:invRow('Alto',hh,u)+invRow('Área total',AT,u+'²'),html:P('1. Datos','V = '+fmt(V)+' '+u+'³, a = '+fmt(l)+', b = '+fmt(w)+' '+u)+P('2. Alto (de V = a·b·c)',eq('c = V/(a·b) = '+fmt(V)+'/'+fmt(l*w)+' = <b>'+fmt(hh)+' '+u+'</b>'))};}}
+ ]
+};
+var curFig='cilindro', calcMode='directa', curInv=0, _cT;
+function renderCalculadora(){
+  var h='';
+  h+='<div class="hero"><span class="deco">🧮</span><h1>Calculadora interactiva</h1><p>Modo <b>directa</b>: das las medidas y obtienes áreas y volumen. Modo <b>inversa</b>: das un resultado (volumen, área…) y halla la medida que falta. Todo se actualiza al instante y con el dibujo.</p></div>';
+  h+='<div class="card"><div class="calc-grid">';
+  h+='<div class="calc-panel"><div class="calc-split">';
+  h+='<div class="calc-sub"><h3>📥 Datos</h3>';
+  h+='<div class="calc-mode"><button class="btn btn-o" id="cmD" onclick="setCalcMode(\'directa\')">➡️ Directa</button><button class="btn btn-o" id="cmI" onclick="setCalcMode(\'inversa\')">🔄 Inversa</button></div>';
+  h+='<div class="field"><label>Figura</label><select id="cFig"></select></div>';
+  h+='<div id="cInvSel"></div>';
+  h+='<div id="cCampos"></div>';
+  h+='<div class="field"><label>Unidad</label><select id="cUnit"><option>cm</option><option>m</option><option>mm</option><option>dm</option></select></div></div>';
+  h+='<div class="calc-sub"><h3>📤 Resultados</h3><div id="cRes"></div></div>';
+  h+='</div></div>';
+  h+='<div class="calc-panel"><h3>📐 Figura</h3><div class="figwrap"><div class="figbox" id="cFigBox"><p class="note">Escribe las medidas para ver la figura.</p></div><button class="fs-btn" title="Pantalla completa" onclick="fsCalc()">'+FSICON+'</button></div>';
+  h+='<h3 style="margin-top:14px">📋 Paso a paso</h3><div id="cPasos" class="calc-pasos"><p class="note">El procedimiento aparecerá aquí.</p></div></div>';
+  h+='</div></div>';
+  document.getElementById('sec-calculadora').innerHTML=h;
+  var sel=document.getElementById('cFig');
+  ORDEN.forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=FIG[k].em+' '+FIG[k].nom;sel.appendChild(o);});
+  sel.value=curFig;
+  sel.onchange=function(){curFig=sel.value;curInv=0;calcCampos();calcCompute();};
+  document.getElementById('cUnit').onchange=calcCompute;
+  syncCalcMode();calcCampos();calcCompute();
+}
+function setCalcMode(m){calcMode=m;curInv=0;syncCalcMode();calcCampos();calcCompute();}
+function syncCalcMode(){var d=document.getElementById('cmD'),i=document.getElementById('cmI');if(d)d.classList.toggle('active',calcMode==='directa');if(i)i.classList.toggle('active',calcMode==='inversa');}
+function calcDeb(){clearTimeout(_cT);_cT=setTimeout(calcCompute,160);}
+function buildCampos(campos){
+  var h='';
+  campos.forEach(function(f){h+='<div class="field"><label>'+f[1]+'</label><input type="number" step="any" min="0" id="c_'+f[0]+'" value="'+(f[2]!==undefined?f[2]:'')+'" placeholder="0"></div>';});
+  document.getElementById('cCampos').innerHTML=h;
+  campos.forEach(function(f){document.getElementById('c_'+f[0]).addEventListener('input',calcDeb);});
+}
+function calcCampos(){
+  var invSel=document.getElementById('cInvSel');
+  if(calcMode==='inversa'){
+    var recipes=INV[curFig]||[];if(curInv>=recipes.length)curInv=0;
+    var s='<div class="field"><label>¿Qué dato conoces?</label><select id="cInv">';
+    recipes.forEach(function(rc,i){s+='<option value="'+i+'"'+(i===curInv?' selected':'')+'>'+rc.lbl+'</option>';});
+    s+='</select></div>';invSel.innerHTML=s;
+    document.getElementById('cInv').onchange=function(){curInv=parseInt(this.value,10);calcCampos();calcCompute();};
+    buildCampos(recipes[curInv].campos);
+  }else{invSel.innerHTML='';buildCampos(CALC[curFig].campos);}
+}
+function calcCompute(){
+  var u=document.getElementById('cUnit').value||'cm';
+  var cRes=document.getElementById('cRes'),cFb=document.getElementById('cFigBox'),cPas=document.getElementById('cPasos');
+  var campos=(calcMode==='inversa')?INV[curFig][curInv].campos:CALC[curFig].campos;
+  var vals=[],ok=true;
+  campos.forEach(function(f){var v=parseFloat(document.getElementById('c_'+f[0]).value);if(!(v>0))ok=false;vals.push(v);});
+  if(!ok){cRes.innerHTML='<div class="exp">✏️ Escribe valores positivos para calcular.</div>';cFb.innerHTML='<p class="note">Escribe las medidas para ver la figura.</p>';cPas.innerHTML='<p class="note">El procedimiento aparecerá aquí.</p>';window._calcCache=null;return;}
+  var rows,html,svg;
+  if(calcMode==='inversa'){var out=INV[curFig][curInv].solve(vals,u);rows=out.rows;html=out.html;svg=out.fa?DRAW[curFig](out.fa,u):'';}
+  else{
+    var o=DISP[curFig].apply(null,vals.concat([u])),R=o.R;rows='';
+    for(var key in R){if(R.hasOwnProperty(key)){var lbl={AL:'Área lateral',AT:'Área total',A:'Área (superficie)',V:'Volumen',g:'Generatriz',d:'Diagonal',ap:'Apotema'}[key]||key;var un=(key==='V')?u+'³':(key==='g'||key==='d'||key==='ap')?u:u+'²';rows+='<div class="resrow"><span class="k">'+lbl+'</span><span class="v">'+fmt(R[key])+' '+un+'</span></div>';}}
+    html=o.html;svg=DRAW[curFig](vals,u);
+  }
+  cRes.innerHTML='<div class="resbox">'+rows+'</div><button class="btn btn-pdf" style="margin-top:10px" onclick="pdfCalc()">📄 PDF</button>';
+  cFb.innerHTML=svg||'<p class="note">—</p>';cPas.innerHTML=html;
+  window._calcCache={fig:curFig,u:u,html:html,rows:rows,svg:svg};
+}
+
+/* =========================================================
+   GENERACIÓN DE PDF  (ventana imprimible)
+   ========================================================= */
+var PDF_CSS=':root{--fig-stroke:#2563eb;--fig-fill:rgba(37,99,235,.10);--fig-fill2:rgba(124,58,237,.12);--accent:#2563eb;--accent-2:#7c3aed}'+
+ '.pdffig{text-align:center;margin:14px 0}.pdffig svg{width:280px;height:auto;stroke:#2563eb}'+
+ 'body{font-family:Segoe UI,Arial,sans-serif;color:#182135;max-width:760px;margin:0 auto;padding:26px;line-height:1.55}'+
+ 'h1{color:#2563eb;font-size:1.5rem;border-bottom:3px solid #2563eb;padding-bottom:8px}'+
+ 'h2{color:#7c3aed;font-size:1.1rem;margin-top:18px}.enun{background:#f0f3ff;border-left:4px solid #2563eb;padding:10px 14px;border-radius:0 8px 8px 0;margin:12px 0}'+
+ '.paso{margin:9px 0;padding-left:12px;border-left:2px dashed #c7d8ff}.pt{font-weight:800;font-size:.82rem;color:#7c3aed;display:block}'+
+ '.eqwrap{font-family:Cambria Math,serif;background:#eaf1ff;border:1px solid #c7d8ff;border-radius:8px;padding:6px 12px;margin:5px 0}'+
+ '.res{background:#eaf1ff;border:1px solid #c7d8ff;border-radius:8px;padding:9px 13px;margin-top:8px;font-weight:700;font-family:Cambria Math,serif}.res .ok{color:#059669}'+
+ '.frac{display:inline-flex;flex-direction:column;text-align:center;vertical-align:middle;margin:0 3px}.frac .n{border-bottom:1.6px solid #000;padding:0 5px}.frac .d{padding:0 5px}'+
+ '.opts{list-style:none;padding:0}.opts li{padding:6px 10px;margin:4px 0;border:1px solid #dde3f5;border-radius:8px}.opts li.correct{border-color:#059669;background:#eafaf2}'+
+ '.exp{background:#eaf1ff;border:1px solid #c7d8ff;border-radius:8px;padding:8px 12px;font-size:.85rem;margin:6px 0 16px}.exp b{color:#059669}'+
+ '.qq{font-weight:700;margin-top:14px}.firma{margin-top:30px;text-align:center;color:#8a93b2;font-size:.8rem;border-top:1px solid #dde3f5;padding-top:12px}'+
+ 'sub,sup{font-size:.72em}@media print{button{display:none}}';
+function abrirPDF(titulo,cuerpo){
+  var w=window.open('','_blank');
+  if(!w){alert('Permite las ventanas emergentes para generar el PDF.');return;}
+  w.document.write('<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><title>'+titulo+'</title><style>'+PDF_CSS+'</style></head><body>'+
+    '<h1>📐 '+titulo+'</h1>'+cuerpo+
+    '<div class="firma">Cuerpos Geométricos v3 · Prof. Héctor Hoyos · Geometría</div>'+
+    '<script>window.onload=function(){setTimeout(function(){window.print();},350);};<\/script></body></html>');
+  w.document.close();
+}
+function figForPDF(fn,a,u){if(!fn||!a||!DRAW[fn])return '';return '<div class="pdffig">'+DRAW[fn](a,u||'cm')+'</div>';}
+function pdfEjemplo(k,i){
+  var ej=FIG[k].ej[i],out=DISP[ej.fn].apply(null,ej.a.concat([ej.u||'cm']));
+  abrirPDF(FIG[k].nom+' — Ejemplo '+(i+1),'<h2>Ejemplo resuelto</h2><div class="enun">'+subsFmt(ej.e)+'</div>'+figForPDF(ej.fn,ej.a,ej.u)+out.html);
+}
+function pdfEj(idx,num){
+  var ej=EJ[idx],nv=NIVN[ej.niv][0];
+  abrirPDF(FIG[ej.fig].nom+' — Ejercicio '+num+' ('+nv+')','<h2>Ejercicio ('+nv+')</h2><div class="enun">'+subsFmt(ej.e)+'</div>'+figForPDF(ej.fn,ej.a,ej.u)+resolverEj(ej).html);
+}
+function pdfRepo(){
+  var c='<h2>Repositorio de preguntas ('+QZ.length+')</h2>';
+  QZ.forEach(function(q,i){
+    c+='<div class="qq">'+(i+1)+'. '+subsFmt(q.q)+'</div><ul class="opts">';
+    q.o.forEach(function(op,j){c+='<li'+(j===q.ok?' class="correct"':'')+'><b>'+String.fromCharCode(65+j)+'.</b> '+subsFmt(op)+(j===q.ok?' ✓':'')+'</li>';});
+    c+='</ul><div class="exp"><b>Correcta: '+String.fromCharCode(65+q.ok)+'.</b> '+subsFmt(q.x)+'</div>';
+  });
+  abrirPDF('Repositorio de preguntas',c);
+}
+function pdfCalc(){
+  var c=window._calcCache;if(!c)return;
+  var res=c.rows.replace(/class="resrow"/g,'style="display:flex;justify-content:space-between;border-bottom:1px dashed #c7d8ff;padding:5px 0"').replace(/class="k"/g,'').replace(/class="v"/g,'style="font-weight:800;color:#2563eb"');
+  abrirPDF(FIG[c.fig].nom+' — Cálculo','<div class="pdffig">'+c.svg+'</div><h2>Resultados</h2><div class="res">'+res+'</div><h2>Procedimiento</h2>'+c.html);
+}
+
+/* =========================================================
+   NAVEGACIÓN / TEMA / INICIO
+   ========================================================= */
+function goTo(sec){
+  document.querySelectorAll('.sec').forEach(function(s){s.classList.remove('show');});
+  var el=document.getElementById('sec-'+sec);if(el)el.classList.add('show');
+  document.querySelectorAll('#nav button').forEach(function(b){b.classList.toggle('active',b.getAttribute('data-sec')===sec);});
+  var main=document.getElementById('main');
+  main.classList.toggle('lock',sec==='repositorio');
+  main.scrollTo({top:0,behavior:'smooth'});
+  if(FIG[sec])startViewer(sec);else stopViewer();
+}
+document.getElementById('nav').addEventListener('click',function(e){var b=e.target.closest('button');if(b)goTo(b.getAttribute('data-sec'));});
+
+var themeBtn=document.getElementById('themeBtn');
+function applyTheme(t){document.documentElement.setAttribute('data-theme',t);document.body.setAttribute('data-theme',t);themeBtn.textContent=t==='dark'?'🌙':'☀️';}
+applyTheme(localStorage.getItem('edu-theme')||'light');
+themeBtn.onclick=function(){var cur=document.documentElement.getAttribute('data-theme')==='dark'?'dark':'light';var nx=cur==='dark'?'light':'dark';applyTheme(nx);localStorage.setItem('edu-theme',nx);if(activeV)activeV.draw();};
+
+/* =========================================================
+   VISOR 3D (canvas, wireframe, arrastrable) — sin librerías
+   ========================================================= */
+function boxModel(a,b,c){var x=a/2,y=b/2,z=c/2;return{p:[[-x,-y,-z],[x,-y,-z],[x,y,-z],[-x,y,-z],[-x,-y,z],[x,-y,z],[x,y,z],[-x,y,z]],e:[[0,1],[1,2],[2,3],[3,0],[4,5],[5,6],[6,7],[7,4],[0,4],[1,5],[2,6],[3,7]],f:[[0,1,2,3],[5,4,7,6],[4,0,3,7],[1,5,6,2],[4,5,1,0],[3,2,6,7]]};}
+function pyrModel(a,h){var s=a/2,y0=-h/2,y1=h/2;return{p:[[-s,y0,-s],[s,y0,-s],[s,y0,s],[-s,y0,s],[0,y1,0]],e:[[0,1],[1,2],[2,3],[3,0],[0,4],[1,4],[2,4],[3,4]],f:[[0,1,2,3],[0,1,4],[1,2,4],[2,3,4],[3,0,4]]};}
+function cylModel(r,h,n){var p=[],e=[],f=[],y0=-h/2,y1=h/2,i,a;for(i=0;i<n;i++){a=2*PI*i/n;p.push([r*Math.cos(a),y0,r*Math.sin(a)]);}for(i=0;i<n;i++){a=2*PI*i/n;p.push([r*Math.cos(a),y1,r*Math.sin(a)]);}var bot=[],top=[];for(i=0;i<n;i++){e.push([i,(i+1)%n]);e.push([n+i,n+(i+1)%n]);if(i%4===0)e.push([i,n+i]);f.push([i,(i+1)%n,n+(i+1)%n,n+i]);bot.push(i);top.push(n+i);}f.push(bot);f.push(top);return{p:p,e:e,f:f};}
+function coneModel(r,h,n){var p=[],e=[],f=[],y0=-h/2,i,a,base=[];for(i=0;i<n;i++){a=2*PI*i/n;p.push([r*Math.cos(a),y0,r*Math.sin(a)]);}p.push([0,h/2,0]);for(i=0;i<n;i++){e.push([i,(i+1)%n]);if(i%4===0)e.push([i,n]);f.push([i,(i+1)%n,n]);base.push(i);}f.push(base);return{p:p,e:e,f:f};}
+function sphModel(r,lat,lon){var p=[],e=[],f=[],i,j,rings=lat-1;for(i=1;i<lat;i++){var phi=PI*i/lat-PI/2,y=r*Math.sin(phi),rr=r*Math.cos(phi),st=p.length;for(j=0;j<lon;j++){var th=2*PI*j/lon;p.push([rr*Math.cos(th),y,rr*Math.sin(th)]);}for(j=0;j<lon;j++)e.push([st+j,st+(j+1)%lon]);}var ni=p.length;p.push([0,r,0]);var si=p.length;p.push([0,-r,0]);for(j=0;j<lon;j++){for(i=0;i<rings-1;i++){e.push([i*lon+j,(i+1)*lon+j]);f.push([i*lon+j,i*lon+(j+1)%lon,(i+1)*lon+(j+1)%lon,(i+1)*lon+j]);}e.push([si,j]);e.push([ni,(rings-1)*lon+j]);f.push([si,(j+1)%lon,j]);f.push([ni,(rings-1)*lon+j,(rings-1)*lon+(j+1)%lon]);}return{p:p,e:e,f:f};}
+var MODEL={cubo:boxModel(1.5,1.5,1.5),ortoedro:boxModel(1.85,1.15,0.95),piramide:pyrModel(1.7,1.8),cilindro:cylModel(1.0,1.85,28),cono:coneModel(1.15,1.9,28),esfera:sphModel(1.4,7,16)};
+function cssVar(n){return (getComputedStyle(document.documentElement).getPropertyValue(n)||'').trim()||'#2563eb';}
+function parseColor(c){c=(c||'').trim();if(c[0]==='#'){if(c.length===4)return{r:parseInt(c[1]+c[1],16),g:parseInt(c[2]+c[2],16),b:parseInt(c[3]+c[3],16)};return{r:parseInt(c.slice(1,3),16),g:parseInt(c.slice(3,5),16),b:parseInt(c.slice(5,7),16)};}var m=c.match(/\d+/g);if(m&&m.length>=3)return{r:+m[0],g:+m[1],b:+m[2]};return{r:37,g:99,b:235};}
+var VIEWERS={},activeV=null,raf3d=null;
+function attachViewer(cv,model){
+  var dpr=Math.min(window.devicePixelRatio||1,2);
+  var vw={cv:cv,ctx:cv.getContext('2d'),ax:-0.5,ay:0.65,drag:false,lx:0,ly:0,model:model};
+  vw.draw=function(){
+    var w=cv.clientWidth||300,h=cv.clientHeight||260;cv.width=w*dpr;cv.height=h*dpr;
+    var ctx=vw.ctx;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+    var sa=Math.sin(vw.ax),ca=Math.cos(vw.ax),sb=Math.sin(vw.ay),cb=Math.cos(vw.ay);
+    var scale=Math.min(w,h)*0.30,cx=w/2,cy=h/2,dist=6;
+    var R=[],S=[];
+    vw.model.p.forEach(function(v){var x=v[0],y=v[1],z=v[2];var x1=x*cb+z*sb,z1=-x*sb+z*cb;var y1=y*ca-z1*sa,z2=y*sa+z1*ca;R.push([x1,y1,z2]);var f=dist/(dist+z2);S.push([cx+x1*scale*f,cy-y1*scale*f]);});
+    var stroke=cssVar('--fig-stroke');
+    if(vw.solid&&vw.model.f){
+      var base=parseColor(stroke);
+      var faces=vw.model.f.map(function(fc){var zs=0;fc.forEach(function(ix){zs+=R[ix][2];});return{fc:fc,z:zs/fc.length};});
+      faces.sort(function(a,b){return b.z-a.z;});           /* pintor: lejanas primero */
+      ctx.lineJoin='round';
+      faces.forEach(function(F){
+        var fc=F.fc,A=R[fc[0]],B=R[fc[1]],C=R[fc[2]];
+        var ux=B[0]-A[0],uy=B[1]-A[1],uz=B[2]-A[2],vx=C[0]-A[0],vy=C[1]-A[1],vz=C[2]-A[2];
+        var nx=uy*vz-uz*vy,ny=uz*vx-ux*vz,nz=ux*vy-uy*vx,nl=Math.sqrt(nx*nx+ny*ny+nz*nz)||1;
+        var sh=0.45+0.5*(Math.abs(nz)/nl);
+        ctx.beginPath();ctx.moveTo(S[fc[0]][0],S[fc[0]][1]);for(var i=1;i<fc.length;i++)ctx.lineTo(S[fc[i]][0],S[fc[i]][1]);ctx.closePath();
+        ctx.fillStyle='rgb('+Math.round(base.r*sh)+','+Math.round(base.g*sh)+','+Math.round(base.b*sh)+')';ctx.fill();
+        ctx.lineWidth=1;ctx.strokeStyle='rgba('+Math.round(base.r*0.55)+','+Math.round(base.g*0.55)+','+Math.round(base.b*0.55)+',.55)';ctx.stroke();
+      });
+    }else{
+      ctx.lineWidth=1.6;ctx.strokeStyle=stroke;ctx.lineCap='round';
+      vw.model.e.forEach(function(ed){var a=S[ed[0]],b=S[ed[1]],za=(R[ed[0]][2]+R[ed[1]][2])/2;var al=Math.max(0.22,Math.min(1,0.5+0.5*((za+2)/4)));ctx.globalAlpha=al;ctx.beginPath();ctx.moveTo(a[0],a[1]);ctx.lineTo(b[0],b[1]);ctx.stroke();});
+      ctx.globalAlpha=1;
+    }
+  };
+  function down(e){vw.drag=true;var pt=e.touches?e.touches[0]:e;vw.lx=pt.clientX;vw.ly=pt.clientY;}
+  function move(e){if(!vw.drag)return;var pt=e.touches?e.touches[0]:e;vw.ay+=(pt.clientX-vw.lx)*0.01;vw.ax+=(pt.clientY-vw.ly)*0.01;vw.lx=pt.clientX;vw.ly=pt.clientY;if(e.cancelable)e.preventDefault();vw.draw();}
+  function up(){vw.drag=false;}
+  cv.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+  cv.addEventListener('touchstart',down,{passive:true});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',up);
+  return vw;
+}
+function initViewer(k){if(VIEWERS[k])return VIEWERS[k];var cv=document.getElementById('cv3d_'+k);if(!cv)return null;VIEWERS[k]=attachViewer(cv,MODEL[k]);return VIEWERS[k];}
+function loop3d(){if(activeV&&!activeV.drag){activeV.ay+=0.006;activeV.draw();}raf3d=requestAnimationFrame(loop3d);}
+function startViewer(k){var v=initViewer(k);activeV=v;if(v){v.draw();if(!raf3d)loop3d();}}
+function stopViewer(){activeV=null;if(raf3d){cancelAnimationFrame(raf3d);raf3d=null;}}
+function toggleSolid(k){var v=initViewer(k);if(!v)return;v.solid=!v.solid;v.draw();var b=document.getElementById('fillbtn_'+k);if(b)b.classList.toggle('active',v.solid);}
+
+/* ---- PANTALLA COMPLETA (figura SVG / visor 3D) ---- */
+var fsRaf=null,fsView=null;
+function fsCloseAll(){var ov=document.getElementById('fsOv');ov.classList.remove('show');document.getElementById('fsBody').innerHTML='';if(fsRaf){cancelAnimationFrame(fsRaf);fsRaf=null;}fsView=null;}
+function fsOpenSVG(svgHtml){if(!svgHtml)return;var ov=document.getElementById('fsOv');document.getElementById('fsBody').innerHTML=svgHtml;ov.classList.add('show');}
+function fsDiag(k){if(DIAG[k])fsOpenSVG(DIAG[k]());}
+function fsOpen3D(k){var ov=document.getElementById('fsOv');document.getElementById('fsBody').innerHTML='<canvas id="fsCanvas"></canvas>';ov.classList.add('show');fsView=attachViewer(document.getElementById('fsCanvas'),MODEL[k]);fsView.solid=!!(VIEWERS[k]&&VIEWERS[k].solid);(function loop(){if(!fsView)return;if(!fsView.drag)fsView.ay+=0.005;fsView.draw();fsRaf=requestAnimationFrame(loop);})();}
+function fsCalc(){var b=document.getElementById('cFigBox');if(b&&b.querySelector('svg'))fsOpenSVG(b.innerHTML);}
+
+/* ---- ENVIAR IMAGEN POR WHATSAPP (captura del ejemplo/ejercicio) ---- */
+function flattenSVG(s){return s.replace(/var\(--fig-stroke\)/g,'#2563eb').replace(/var\(--fig-fill2\)/g,'#ece4fb').replace(/var\(--fig-fill\)/g,'#dde6ff').replace(/var\(--accent-2\)/g,'#7c3aed').replace(/var\(--accent\)/g,'#2563eb').replace(/var\(--text\)/g,'#182135').replace(/var\(--fig-[a-z0-9-]*\)/g,'#2563eb');}
+function esc(t){return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function stripTags(h){return String(h).replace(/<br\s*\/?>/gi,' ').replace(/<[^>]+>/g,'').replace(/&nbsp;/g,' ').replace(/\s+/g,' ').trim();}
+function wrapText(t,max){var w=t.split(' '),lines=[],cur='';w.forEach(function(word){if((cur+' '+word).trim().length>max){if(cur)lines.push(cur);cur=word;}else cur=(cur?cur+' ':'')+word;});if(cur)lines.push(cur);return lines;}
+function stepsPlain(html){
+  if(!html)return [];
+  var div=document.createElement('div');div.innerHTML=html;
+  [].forEach.call(div.querySelectorAll('.frac'),function(f){var n=f.querySelector('.n'),d=f.querySelector('.d');f.textContent='('+(n?n.textContent:'')+'/'+(d?d.textContent:'')+')';});
+  var out=[];
+  [].forEach.call(div.querySelectorAll('.paso'),function(p){
+    var pt=p.querySelector('.pt'),title=pt?pt.textContent.replace(/\s+/g,' ').trim():'';
+    var full=p.textContent.replace(/\s+/g,' ').trim();
+    var body=(title&&full.indexOf(title)===0)?full.slice(title.length).trim():full;
+    out.push({t:title,b:body});
+  });
+  var res=div.querySelector('.res');if(res)out.push({t:'',b:'= '+res.textContent.replace(/\s+/g,' ').trim()});
+  return out;
+}
+function itemImageSVG(o){
+  var W=720,pad=28,head=58,lh=23,slh=20;
+  var enunLines=wrapText(stripTags(o.enun),68);
+  var hasFig=!!(o.fn&&o.a&&DRAW[o.fn]);
+  var res=o.resLines||[];
+  var steps=(o.steps||[]).map(function(st){return {t:st.t,bl:wrapText(st.b,72)};});
+  /* medir alto */
+  var y=head+28;
+  y+=enunLines.length*lh+6;
+  if(hasFig)y+=236;
+  if(res.length)y+=res.length*24+22;
+  if(steps.length){y+=30;steps.forEach(function(st){y+=slh+st.bl.length*slh+8;});}
+  var H=y+46;
+  /* construir */
+  var s='<svg xmlns="http://www.w3.org/2000/svg" width="'+W+'" height="'+H+'" viewBox="0 0 '+W+' '+H+'" font-family="Segoe UI,Arial,sans-serif">';
+  s+='<rect width="'+W+'" height="'+H+'" fill="#ffffff"/>';
+  s+='<rect width="'+W+'" height="'+head+'" fill="#2563eb"/>';
+  s+='<text x="'+pad+'" y="37" fill="#ffffff" font-size="21" font-weight="700">'+esc(o.titulo)+'</text>';
+  var cy=head+28;
+  enunLines.forEach(function(ln){s+='<text x="'+pad+'" y="'+cy+'" fill="#182135" font-size="16">'+esc(ln)+'</text>';cy+=lh;});
+  cy+=6;
+  if(hasFig){var fig=flattenSVG(DRAW[o.fn](o.a,o.u||'cm')).replace('<svg','<svg width="300" height="220" preserveAspectRatio="xMidYMid meet"');s+='<g transform="translate('+((W-300)/2)+','+cy+')">'+fig+'</g>';cy+=236;}
+  if(res.length){s+='<rect x="'+pad+'" y="'+cy+'" width="'+(W-2*pad)+'" height="'+(res.length*24+10)+'" fill="#eaf1ff" stroke="#c7d8ff" rx="10"/>';var ry=cy+24;res.forEach(function(rl){s+='<text x="'+(pad+14)+'" y="'+ry+'" fill="#182135" font-size="15" font-weight="700">'+esc(rl)+'</text>';ry+=24;});cy+=res.length*24+22;}
+  if(steps.length){
+    s+='<text x="'+pad+'" y="'+(cy+18)+'" fill="#7c3aed" font-size="16" font-weight="800">Paso a paso</text>';cy+=30;
+    steps.forEach(function(st){
+      if(st.t){s+='<text x="'+pad+'" y="'+cy+'" fill="#2563eb" font-size="14" font-weight="700">'+esc(st.t)+'</text>';}
+      cy+=slh;
+      st.bl.forEach(function(bl){s+='<text x="'+(pad+10)+'" y="'+cy+'" fill="#182135" font-size="14">'+esc(bl)+'</text>';cy+=slh;});
+      cy+=8;
+    });
+  }
+  s+='<text x="'+pad+'" y="'+(H-18)+'" fill="#8a93b2" font-size="13">Prof. Hector Hoyos - Cuerpos Geometricos v3</text>';
+  s+='</svg>';return {svg:s,w:W,h:H};
+}
+function svgToPng(svgString,w,h,cb){
+  var img=new Image();
+  img.onload=function(){var sc=2,c=document.createElement('canvas');c.width=w*sc;c.height=h*sc;var ctx=c.getContext('2d');ctx.fillStyle='#ffffff';ctx.fillRect(0,0,c.width,c.height);ctx.setTransform(sc,0,0,sc,0,0);ctx.drawImage(img,0,0,w,h);try{c.toBlob(function(b){cb(b);},'image/png');}catch(e){cb(null);}};
+  img.onerror=function(){cb(null);};
+  img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(svgString);
+}
+function resLinesFor(fn,a,u){if(!fn||!DISP[fn]||!a)return [];var R=DISP[fn].apply(null,a.concat([u||'cm'])).R,out=[],nm={AL:'Área lateral',AT:'Área total',A:'Área',V:'Volumen',g:'Generatriz',d:'Diagonal',ap:'Apotema'};for(var k in R){if(R.hasOwnProperty(k)){var un=(k==='V')?(u||'cm')+'³':(k==='g'||k==='d'||k==='ap')?(u||'cm'):(u||'cm')+'²';out.push((nm[k]||k)+': '+fmt(R[k])+' '+un);}}return out;}
+function shareItem(o){
+  var im=itemImageSVG(o);
+  svgToPng(im.svg,im.w,im.h,function(blob){
+    var text=o.titulo+' — '+stripTags(o.enun);
+    if(blob&&navigator.canShare){try{var file=new File([blob],'geometria.png',{type:'image/png'});if(navigator.canShare({files:[file]})){navigator.share({files:[file],text:text});return;}}catch(e){}}
+    if(blob){var a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='geometria.png';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},3000);}
+    window.open('https://wa.me/?text='+encodeURIComponent(text+'\n\n(La imagen se descargó: adjúntala en el chat)'),'_blank');
+  });
+}
+function waEjemplo(k,i){var ej=FIG[k].ej[i];var html=DISP[ej.fn].apply(null,ej.a.concat([ej.u||'cm'])).html;shareItem({titulo:FIG[k].nom+' — Ejemplo '+(i+1),enun:ej.e,fn:ej.fn,a:ej.a,u:ej.u,resLines:resLinesFor(ej.fn,ej.a,ej.u),steps:stepsPlain(html)});}
+function waEj(idx){var ej=EJ[idx];var html=resolverEj(ej).html;shareItem({titulo:FIG[ej.fig].nom+' — Ejercicio',enun:ej.e,fn:ej.fn,a:ej.a,u:ej.u,resLines:ej.fn?resLinesFor(ej.fn,ej.a,ej.u):[],steps:stepsPlain(html)});}
+function waCtx(id){var p=ctxFind(id);if(!p)return;var html=DISP[p.fig].apply(null,p.a.concat([p.u||'cm'])).html;shareItem({titulo:'Problema — '+FIG[p.fig].nom,enun:p.enun,fn:p.fig,a:p.a,u:p.u,resLines:resLinesFor(p.fig,p.a,p.u),steps:stepsPlain(html)});}
+
+/* =========================================================
+   DESARROLLO PLANO (plantillas recortables) — NET[fig]()
+   ========================================================= */
+function netSvg(inner,W,H){return '<svg viewBox="0 0 '+W+' '+H+'" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;max-width:660px">'+inner+'</svg>';}
+function nRect(x,y,w,h,f){return '<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="var('+(f||'--fig-fill')+')" stroke="var(--fig-stroke)" stroke-width="1.6"/>';}
+var NET={
+ cubo:function(){var s=95,g='';g+=nRect(s,0,s,s)+nRect(0,s,s,s)+nRect(s,s,s,s)+nRect(2*s,s,s,s)+nRect(3*s,s,s,s)+nRect(s,2*s,s,s);g+=dTxt(s+s/2,s+s/2+5,'a','middle');return netSvg(g,4*s,3*s);},
+ ortoedro:function(){var a=120,b=72,c=86,y=b,g='';g+=nRect(0,y,b,c)+nRect(b,y,a,c)+nRect(b+a,y,b,c)+nRect(2*b+a,y,a,c)+nRect(b,0,a,b,'--fig-fill2')+nRect(b,y+c,a,b,'--fig-fill2');g+=dTxt(b+a/2,y+c/2+5,'a','middle')+dTxt(b/2,y+c/2+5,'b','middle')+dTxt(b+a/2,b/2+5,'c','middle');return netSvg(g,2*a+2*b,2*b+c);},
+ piramide:function(){var s=120,th=100,ox=th,oy=th,g='';g+=nRect(ox,oy,s,s);g+='<path d="M'+ox+' '+oy+' L'+(ox+s)+' '+oy+' L'+(ox+s/2)+' '+(oy-th)+' Z" fill="var(--fig-fill2)" stroke="var(--fig-stroke)" stroke-width="1.6"/>';g+='<path d="M'+ox+' '+(oy+s)+' L'+(ox+s)+' '+(oy+s)+' L'+(ox+s/2)+' '+(oy+s+th)+' Z" fill="var(--fig-fill2)" stroke="var(--fig-stroke)" stroke-width="1.6"/>';g+='<path d="M'+ox+' '+oy+' L'+ox+' '+(oy+s)+' L'+(ox-th)+' '+(oy+s/2)+' Z" fill="var(--fig-fill2)" stroke="var(--fig-stroke)" stroke-width="1.6"/>';g+='<path d="M'+(ox+s)+' '+oy+' L'+(ox+s)+' '+(oy+s)+' L'+(ox+s+th)+' '+(oy+s/2)+' Z" fill="var(--fig-fill2)" stroke="var(--fig-stroke)" stroke-width="1.6"/>';g+=dTxt(ox+s/2,oy+s/2+5,'base (a)','middle');return netSvg(g,s+2*th,s+2*th);},
+ cilindro:function(){var r=58,h=160,C=Math.round(2*PI*r),g='';g+='<circle cx="'+(C/2)+'" cy="'+r+'" r="'+r+'" fill="var(--fig-fill)" stroke="var(--fig-stroke)" stroke-width="1.6"/>';g+=nRect(0,2*r,C,h,'--fig-fill2');g+='<circle cx="'+(C/2)+'" cy="'+(2*r+h+r)+'" r="'+r+'" fill="var(--fig-fill)" stroke="var(--fig-stroke)" stroke-width="1.6"/>';g+=dTxt(C/2,r+5,'r','middle')+dTxt(C/2,2*r+h/2+5,'h','middle')+dTxt(C/2,2*r+h+20,'2πr','middle');return netSvg(g,C,4*r+h);},
+ cono:function(){
+   /* Cono real: r y h -> g=sqrt(r^2+h^2); ángulo del sector = 2πr/g (arco del sector = circunferencia de la base) */
+   var r=45,h=95,gg=Math.sqrt(r*r+h*h),ang=2*PI*r/gg;
+   var apx=gg+18,apy=18;                 /* vértice del sector */
+   var N=48,i,t,x,y,arc='',firstX,firstY;
+   for(i=0;i<=N;i++){t=-ang/2+ang*i/N;x=apx+gg*Math.sin(t);y=apy+gg*Math.cos(t);arc+=' L'+x.toFixed(1)+' '+y.toFixed(1);if(i===0){firstX=x;firstY=y;}}
+   var s='';
+   s+='<path d="M'+apx+' '+apy+arc+' Z" fill="var(--fig-fill2)" stroke="var(--fig-stroke)" stroke-width="1.6" stroke-linejoin="round"/>';
+   var midY=apy+gg, baseY=midY+r+26;      /* base tangente bajo el arco */
+   s+='<circle cx="'+apx+'" cy="'+baseY+'" r="'+r+'" fill="var(--fig-fill)" stroke="var(--fig-stroke)" stroke-width="1.6"/>';
+   s+=dTxt((apx+firstX)/2-4,(apy+firstY)/2,'g','end');
+   s+=dTxt(apx,baseY+4,'r','middle');
+   s+=dTxt(apx,midY+14,'arco = 2πr','middle');
+   return netSvg(s,2*apx,baseY+r+18);}
+};
+function pdfPlantilla(k){var net=NET[k]?NET[k]():'';var f=FIG[k];var body='<h2>Desarrollo plano (plantilla) — '+f.nom+'</h2>'+'<p>Imprime, <b>recorta por el borde exterior</b> y <b>dobla por las líneas interiores</b> para armar el '+f.nom.toLowerCase()+'. Añade pestañas de pegado donde lo necesites.</p>'+'<div style="text-align:center;margin:14px 0">'+net+'</div>'+'<p style="font-size:.8rem;color:#666">💡 Ajusta la escala al imprimir (%) según el tamaño que quieras construir. Referencia: a=arista/lado, r=radio, h=altura, g=generatriz, 2πr=contorno de la base.</p>';abrirPDF('Plantilla recortable — '+f.nom,body);}
+
+/* =========================================================
+   IMPRESIÓN DE TEORÍA COMPLETA — pdfTeoria(fig)
+   ========================================================= */
+function pdfTeoria(k){var f=FIG[k],c='';c+='<h2>'+f.nom+' — '+f.tipo+'</h2><p>'+f.teoria+'</p>';if(DIAG[k])c+='<div class="pdffig">'+DIAG[k]()+'</div>';c+='<h2>Elementos</h2><ul>';f.elem.forEach(function(e){c+='<li><b>'+e[0]+':</b> '+subsFmt(e[1])+'</li>';});c+='</ul><h2>Fórmulas</h2>';f.form.forEach(function(fo){c+='<div class="res">'+fo[0]+': '+subsFmt(fo[1])+(fo[2]?' &nbsp;'+fo[2]:'')+'</div>';});c+='<h2>Ejemplos resueltos</h2>';f.ej.forEach(function(ej,i){var out=DISP[ej.fn].apply(null,ej.a.concat([ej.u||'cm']));c+='<div class="enun"><b>Ejemplo '+(i+1)+'.</b> '+subsFmt(ej.e)+'</div>'+figForPDF(ej.fn,ej.a,ej.u)+out.html;});abrirPDF('Teoría — '+f.nom,c);}
+
+/* =========================================================
+   CONTEXTO RURAL CONFIGURABLE — problemas guardados (localStorage)
+   ========================================================= */
+var CTX_KEY='cgv3-contexto';
+var CTX_SEED=[
+ {id:1,enun:'Un balde cilíndrico de la finca tiene 18 cm de radio y 35 cm de altura. ¿Cuántos cm³ de agua carga? (recuerda: 1000 cm³ = 1 litro)',fig:'cilindro',a:[18,35],u:'cm'},
+ {id:2,enun:'Un montón de arena tiene forma de cono de 2 m de radio y 1,5 m de altura. ¿Qué volumen de arena hay?',fig:'cono',a:[2,1.5],u:'m'},
+ {id:3,enun:'Una caja de madera para herramientas mide 60 × 40 × 30 cm. ¿Cuánta pintura (área total) se necesita para cubrirla por fuera?',fig:'ortoedro',a:[60,40,30],u:'cm'},
+ {id:4,enun:'Un tanque esférico de gas del vecino tiene 1,2 m de radio. ¿Qué volumen de gas cabe dentro?',fig:'esfera',a:[1.2],u:'m'}
+];
+function ctxLoad(){try{var s=localStorage.getItem(CTX_KEY);if(s){var a=JSON.parse(s);if(Array.isArray(a))return a;}}catch(e){}return CTX_SEED.slice();}
+function ctxSave(){try{localStorage.setItem(CTX_KEY,JSON.stringify(ctxData));}catch(e){}}
+var ctxData=ctxLoad();
+function renderContexto(){
+  var h='';
+  h+='<div class="hero"><span class="deco">🌾</span><h1>Problemas del contexto</h1><p>Banco de problemas aplicados a tu entorno rural. Agrega, guarda o borra problemas; cada uno se resuelve solo con las fórmulas y su figura. Se guardan en este equipo.</p></div>';
+  h+='<div class="ctx-form"><h3 style="font-size:.95rem;font-weight:800;color:var(--accent);margin-bottom:8px">➕ Nuevo problema</h3>';
+  h+='<div class="field"><label>Enunciado</label><textarea id="ctxEnun" rows="2" placeholder="Escribe el problema…" style="width:100%;padding:9px 12px;border:1.5px solid var(--line-2);border-radius:10px;background:var(--panel);color:var(--text);font:inherit;font-size:.92rem;resize:vertical"></textarea></div>';
+  h+='<div class="row"><div class="field"><label>Figura</label><select id="ctxFig"></select></div><div class="field"><label>Unidad</label><select id="ctxU"><option>cm</option><option>m</option><option>mm</option><option>dm</option></select></div></div>';
+  h+='<div class="row" id="ctxDims"></div>';
+  h+='<div class="ctx-actions"><button class="btn btn-g" onclick="ctxAdd()">💾 Guardar problema</button><button class="btn btn-o" onclick="ctxReset()">↺ Restaurar ejemplos</button><button class="btn btn-pdf" onclick="ctxPdfAll()">📄 PDF de todos</button></div></div>';
+  h+='<div id="ctxList"></div>';
+  document.getElementById('sec-contexto').innerHTML=h;
+  var sel=document.getElementById('ctxFig');ORDEN.forEach(function(k){var o=document.createElement('option');o.value=k;o.textContent=FIG[k].em+' '+FIG[k].nom;sel.appendChild(o);});
+  sel.value='cilindro';sel.onchange=ctxDims;
+  ctxDims();ctxRenderList();
+}
+function ctxDims(){var f=document.getElementById('ctxFig').value,h='';CALC[f].campos.forEach(function(c){h+='<div class="field"><label>'+c[1]+'</label><input type="number" step="any" min="0" id="ctxd_'+c[0]+'" placeholder="0"></div>';});document.getElementById('ctxDims').innerHTML=h;}
+function ctxAdd(){var enun=document.getElementById('ctxEnun').value.trim(),fig=document.getElementById('ctxFig').value,u=document.getElementById('ctxU').value;if(!enun){alert('Escribe el enunciado.');return;}var a=[],ok=true;CALC[fig].campos.forEach(function(c){var v=parseFloat(document.getElementById('ctxd_'+c[0]).value);if(!(v>0))ok=false;a.push(v);});if(!ok){alert('Escribe todas las medidas (positivas).');return;}ctxData.push({id:Date.now(),enun:enun,fig:fig,a:a,u:u});ctxSave();document.getElementById('ctxEnun').value='';ctxDims();ctxRenderList();}
+function ctxDel(id){ctxData=ctxData.filter(function(p){return p.id!==id;});ctxSave();ctxRenderList();}
+function ctxReset(){if(!confirm('¿Restaurar los problemas de ejemplo? Se perderán los que agregaste.'))return;ctxData=CTX_SEED.slice();ctxSave();ctxRenderList();}
+function ctxFind(id){for(var i=0;i<ctxData.length;i++)if(ctxData[i].id===id)return ctxData[i];return null;}
+function ctxRenderList(){
+  var h='';
+  if(!ctxData.length)h='<div class="card"><p class="note">No hay problemas. Agrega uno con el formulario de arriba.</p></div>';
+  ctxData.forEach(function(p,i){var out=DISP[p.fig].apply(null,p.a.concat([p.u||'cm']));
+    h+='<div class="ctx-card" id="ctx'+p.id+'"><div class="ch"><div style="display:flex;align-items:center;gap:8px"><span class="num" style="width:26px;height:26px;border-radius:8px;background:var(--grad);color:#fff;display:flex;align-items:center;justify-content:center;font-size:.78rem;font-weight:800">'+(i+1)+'</span><span class="ctag">'+FIG[p.fig].em+' '+FIG[p.fig].nom+'</span></div><button class="btn btn-del" onclick="ctxDel('+p.id+')">🗑️ Borrar</button></div>';
+    h+='<p class="enun" style="color:var(--text-2);margin:9px 0">'+p.enun.replace(/</g,'&lt;')+'</p>';
+    h+='<div class="xactions"><button class="btn btn-g" id="ctxb'+p.id+'" onclick="ctxToggle('+p.id+')">👁️ Ver solución</button><button class="btn btn-wa" onclick="waCtx('+p.id+')">🟢 WhatsApp</button><button class="btn btn-pdf" onclick="ctxPdf('+p.id+')">📄 PDF</button></div>';
+    h+='<div class="sol" style="display:none;margin-top:10px;border-top:1px dashed var(--line-2);padding-top:10px">'+figForPDF(p.fig,p.a,p.u)+out.html+'</div></div>';
+  });
+  document.getElementById('ctxList').innerHTML=h;
+}
+function ctxToggle(id){var c=document.getElementById('ctx'+id);if(!c)return;var s=c.querySelector('.sol'),b=document.getElementById('ctxb'+id),open=s.style.display==='none';s.style.display=open?'block':'none';if(b)b.innerHTML=open?'🙈 Ocultar solución':'👁️ Ver solución';}
+function ctxPdf(id){var p=ctxFind(id);if(!p)return;var out=DISP[p.fig].apply(null,p.a.concat([p.u||'cm']));abrirPDF('Problema del contexto — '+FIG[p.fig].nom,'<div class="enun">'+p.enun.replace(/</g,'&lt;')+'</div>'+figForPDF(p.fig,p.a,p.u)+out.html);}
+function ctxPdfAll(){var c='<h2>Problemas del contexto ('+ctxData.length+')</h2>';ctxData.forEach(function(p,i){var out=DISP[p.fig].apply(null,p.a.concat([p.u||'cm']));c+='<div class="enun"><b>Problema '+(i+1)+' ('+FIG[p.fig].nom+').</b> '+p.enun.replace(/</g,'&lt;')+'</div>'+out.html;});abrirPDF('Problemas del contexto',c);}
+
+/* =========================================================
+   EXPORTAR / COMPARTIR
+   ========================================================= */
+function appHtml(){return '<!DOCTYPE html>\n'+document.documentElement.outerHTML;}
+function downloadApp(){var b=new Blob([appHtml()],{type:'text/html'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='Cuerpos Geometricos v3.html';document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(a.href);},3000);}
+function shareApp(){var b=new Blob([appHtml()],{type:'text/html'});try{var file=new File([b],'Cuerpos Geometricos v3.html',{type:'text/html'});if(navigator.canShare&&navigator.canShare({files:[file]})){navigator.share({files:[file],title:'Cuerpos Geométricos v3',text:'App de geometría offline'});return;}}catch(e){}if(navigator.share){navigator.share({title:'Cuerpos Geométricos v3',url:location.href});}else{downloadApp();}}
+function wireShare(){
+  var ov=document.getElementById('shareOv');
+  document.getElementById('shareBtn').onclick=function(){ov.classList.add('show');};
+  document.getElementById('shClose').onclick=function(){ov.classList.remove('show');};
+  ov.addEventListener('click',function(e){if(e.target===ov)ov.classList.remove('show');});
+  document.getElementById('shDown').onclick=function(){downloadApp();ov.classList.remove('show');};
+  document.getElementById('shShare').onclick=function(){shareApp();};
+  document.getElementById('shCopy').onclick=function(){if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(location.href).then(function(){alert('✅ Enlace copiado');},function(){prompt('Copia el enlace:',location.href);});else prompt('Copia el enlace:',location.href);};
+  document.getElementById('shWa').onclick=function(){window.open('https://wa.me/?text='+encodeURIComponent('Cuerpos Geométricos v3 — '+location.href),'_blank');};
+}
+
+/* Inicializar */
+renderIntro();
+ORDEN.forEach(renderFigura);
+renderEjercicios();
+renderRepositorio();
+renderContexto();
+renderCalculadora();
+wireShare();
+document.getElementById('fsClose').onclick=fsCloseAll;
+document.getElementById('fsOv').addEventListener('click',function(e){if(e.target===this)fsCloseAll();});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){fsCloseAll();document.getElementById('shareOv').classList.remove('show');}});
+</script>
+</body>
+</html>
